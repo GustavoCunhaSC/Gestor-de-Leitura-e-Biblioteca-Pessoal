@@ -1,3 +1,8 @@
+#Esse aqui é o código de criação do banco de dados
+#O banco de dados em si é o arquivo chamado biblioteca.db,
+# é ao arquivo biblioteca.db ele voces vão se conectar quando forem mecher no banco de dados como visualizar dados, inserir, deletar, alterar etc
+
+
 import sqlite3
 
 conexao = sqlite3.connect('biblioteca.db')
@@ -5,7 +10,7 @@ cursor = conexao.cursor()
 
 #tabela de autores 
 cursor.execute('''
-CREATE TABLE autores (
+CREATE TABLE IF NOT EXIST autores (
     id_autor INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL
 )
@@ -13,7 +18,7 @@ CREATE TABLE autores (
 
 #tabela de status
 cursor.execute('''
-CREATE TABLE status (
+CREATE TABLE IF NOT EXIST status (
     id_status INTEGER PRIMARY KEY AUTOINCREMENT,
     descricao TEXT NOT NULL
 )
@@ -36,3 +41,4 @@ conexao.commit()
 conexao.close()
 
 print("Banco de dados e tabelas criados com sucesso!")
+
