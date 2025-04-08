@@ -97,3 +97,37 @@ def consultar_por_status(status):
             print(f"ID: {livro[0]}, Título: {livro[1]}, Autor: {livro[2]}, Status: {livro[3]}")
     else:
         print(f"Nenhum livro com status '{status}' encontrado.")
+
+#função para consultar apenas os livros
+
+def consultar_livros_apenas():
+    cursor.execute("SELECT * FROM livros")
+    resultados = cursor.fetchall()
+
+    if resultados:
+        for livro in resultados:
+            print(f"ID: {livro[0]}, Título: {livro[1]}, ID Autor: {livro[2]}, ID Status: {livro[3]}")
+    else:
+        print("Nenhum livro encontrado.")
+#função para consultar apenas os autores
+
+def consultar_autores_apenas():
+    cursor.execute("SELECT * FROM autores")
+    resultados = cursor.fetchall()
+
+    if resultados:
+        for autor in resultados:
+            print(f"ID: {autor[0]}, Nome: {autor[1]}")
+    else:
+        print("Nenhum autor encontrado.")
+
+#função para consultar apenas os os status
+def consultar_status_apenas():
+    cursor.execute("SELECT * FROM status")
+    resultados = cursor.fetchall()
+
+    if resultados:
+        for status in resultados:
+            print(f"ID: {status[0]}, Descrição: {status[1]}")
+    else:
+        print("Nenhum status encontrado.")

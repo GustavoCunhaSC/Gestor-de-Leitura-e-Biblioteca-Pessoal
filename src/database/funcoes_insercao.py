@@ -3,52 +3,39 @@ import sqlite3
 conexao = sqlite3.connect('biblioteca.db')
 cursor = conexao.cursor()
 
+
 #função para inserir livro com validação
-def inserir_livro(titulo, id_autor, id_status):
-    if not titulo.strip():
-        print("Erro: O título do livro não pode estar vazio.")
-        return
-    
-    if not id_autor:
-        print("Erro: O ID do autor é obrigatório.")
+#essa função serve para: 
+# Verificar se o autor já existe na tabela autores.
+# Se não existir, vai inseri-lo automaticamente.
+# Verificar se o id_status informado é válido (1, 2 ou 3).
+# Inserir o livro com o id_autor e id_status.
+
+def inserir_livro(titulo, nome_autor, id_status):
+    conexao = sqlite3.connect('biblioteca.db')
+    cursor = conexao.cursor()
+
+    # Verifica se o status informado é válido
+    cursor.execute("SELECT id_status FROM status WHERE id_status = ?", (id_status,))
+    status_valido = cursor.fetchone()
+    if not status_valido:
+        print(f"Status ID {id_status} inválido. Use 1 (Lido), 2 (Lendo) ou 3 (Quero ler).")
+        conexao.close()
         return
 
-    if not id_status:
-        print("Erro: O ID do status é obrigatório.")
-        return
+    # Verifica se o autor já existe
+    cursor.execute("SELECT id_autor FROM autores WHERE LOWER(nome) = LOWER(?)", (nome_autor,))
+    resultado = cursor.fetchone()
 
-    cursor.execute('''
-        INSERT INTO livros (titulo, id_autor, id_status)
-        VALUES (?, ?, ?)
-    ''', (titulo, id_autor, id_status))
+    if resultado:
+        id_autor = resultado[0]
+    else:
+        # Insere o autor e obtém o novo id_autor
+        cursor.execute("INSERT INTO autores (nome) VALUES (?)", (nome_autor,))
+        id_autor = cursor.lastrowid
+
+    # Insere o livro com id_autor e id_status
+    cursor.execute("INSERT INTO livros (titulo, id_autor, id_status) VALUES (?, ?, ?)", (titulo, id_autor, id_status))
     conexao.commit()
-    print("Livro inserido com sucesso!")
-
-#função inserir autor com validação
-def inserir_autor(nome,):
-    if not nome.strip():
-        print("Erro: O nome do autor não pode estar vazio.")
-        return
-    
-    cursor.execute('''
-        INSERT INTO autores (nome)
-        VALUES (?)
-    ''', (nome,) )
-    conexao.commit()
-    print("Autor inserido com sucesso!")
-
-#função inserir status com validação
-def inserir_status(descricao):
-    if not descricao.strip():
-        print("Erro: A descrição do status não pode estar vazia.")
-        return
-    
-    cursor.execute('''
-        INSERT INTO status (descricao)
-        VALUES (?)
-    ''', (descricao,))
-    conexao.commit()
-    print("Status inserido com sucesso!")
-
-
-
+    conexao.close()
+    print(f"Livro '{titulo}' inserido com sucesso!")
