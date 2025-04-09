@@ -1,6 +1,6 @@
 import sqlite3
 
-conexao = sqlite3.connect('biblioteca.db')
+conexao = sqlite3.connect('gerenciador_de_leitura.db')
 cursor = conexao.cursor()
 
 
@@ -12,8 +12,6 @@ cursor = conexao.cursor()
 # Inserir o livro com o id_autor e id_status.
 
 def inserir_livro(titulo, nome_autor, id_status):
-    conexao = sqlite3.connect('biblioteca.db')
-    cursor = conexao.cursor()
 
     # Verifica se o status informado é válido
     cursor.execute("SELECT id_status FROM status WHERE id_status = ?", (id_status,))

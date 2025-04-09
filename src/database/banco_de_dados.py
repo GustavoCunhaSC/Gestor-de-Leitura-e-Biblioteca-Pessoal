@@ -5,7 +5,7 @@
 
 import sqlite3
 
-conexao = sqlite3.connect('biblioteca.db')
+conexao = sqlite3.connect('gerenciador_de_leitura.db')
 cursor = conexao.cursor()
 
 #tabela de autores 

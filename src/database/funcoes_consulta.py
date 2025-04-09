@@ -1,7 +1,7 @@
 import sqlite3
 
 # Conectar ao banco de dados
-conexao = sqlite3.connect('biblioteca.db')
+conexao = sqlite3.connect('gerenciador_de_leitura.db')
 cursor = conexao.cursor()
 
 # Função para consultar todos os livros junto com o nome do autor e status
