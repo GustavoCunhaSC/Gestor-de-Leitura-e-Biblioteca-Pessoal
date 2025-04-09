@@ -84,10 +84,5 @@ def editar_status_livro(id_livro, novo_id_status):
 
 
 
-#essa função serve para: 
-# Verificar se o autor já existe na tabela autores.
-# Se não existir, vai inseri-lo automaticamente.
-# Verificar se o id_status informado é válido (1, 2 ou 3).
-# Inserir o livro com o id_autor e id_status.
 
 
