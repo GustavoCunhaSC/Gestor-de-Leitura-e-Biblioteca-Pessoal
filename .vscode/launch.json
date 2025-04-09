@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Executar teste.py",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/src/database/teste.py",
+        "cwd": "${workspaceFolder}/src/database",
+        "console": "integratedTerminal"
+      }
+    ]
+  }
+  
