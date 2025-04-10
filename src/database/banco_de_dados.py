@@ -1,42 +1,49 @@
-#Esse aqui é o código de criação do banco de dados
-#O banco de dados em si é o arquivo chamado biblioteca.db,
-# é ao arquivo biblioteca.db ele voces vão se conectar quando forem mecher no banco de dados como visualizar dados, inserir, deletar, alterar etc
-
-
 import sqlite3
 
 conexao = sqlite3.connect('gerenciador_de_leitura.db')
 cursor = conexao.cursor()
 
-#tabela de autores 
+# Tabela de usuários
 cursor.execute('''
-CREATE TABLE IF NOT EXIST autores (
+CREATE TABLE IF NOT EXISTS usuarios (
+    id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    senha TEXT NOT NULL
+)
+''')
+
+# Tabela de autores
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS autores (
     id_autor INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL
 )
 ''')
 
-#tabela de status
+# Tabela de status
 cursor.execute('''
-CREATE TABLE IF NOT EXIST status (
+CREATE TABLE IF NOT EXISTS status (
     id_status INTEGER PRIMARY KEY AUTOINCREMENT,
     descricao TEXT NOT NULL
 )
 ''')
 
-#tabela de livros
+# Tabela de livros (agora ligada a usuários)
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS livros (
     id_livro INTEGER PRIMARY KEY AUTOINCREMENT,
     titulo TEXT NOT NULL,
     id_autor INTEGER,
     id_status INTEGER,
+    id_usuario INTEGER,
     FOREIGN KEY (id_autor) REFERENCES autores(id_autor),
-    FOREIGN KEY (id_status) REFERENCES status(id_status)
+    FOREIGN KEY (id_status) REFERENCES status(id_status),
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 )
 ''')
 
-# Salva as alterações e fecha a conexão
+# Salva e fecha
 conexao.commit()
 conexao.close()
 
