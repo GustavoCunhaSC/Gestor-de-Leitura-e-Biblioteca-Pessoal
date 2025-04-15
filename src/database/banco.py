@@ -29,19 +29,20 @@ def criar_tabelas():
     ''')
 
     # Criar tabela livros
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS livros (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo TEXT NOT NULL,
-            autor_id INTEGER,
-            status TEXT CHECK(status IN ('Lido', 'Lendo', 'Quero ler')) NOT NULL,
-            data_inicio TEXT,
-            data_fim TEXT,
-            usuario_id INTEGER,
-            FOREIGN KEY(autor_id) REFERENCES autores(id),
-            FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
-        );
-    ''')
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS livros (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        titulo TEXT NOT NULL,
+        autor TEXT NOT NULL,
+        status TEXT NOT NULL,
+        data_inicio TEXT,
+        data_fim TEXT,
+        caminho_pdf TEXT,
+        usuario_id INTEGER NOT NULL,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    );
+""")
+
 
     conn.commit()
     conn.close()
