@@ -39,6 +39,7 @@ Após ativar o ambiente virtual e instalar as dependências: python src/main.py
 
 ---
 
-1. Clone o repositório
+## Clone o repositório
 git clone https://github.com/GustavoCunhaSC/Gestor-de-Leitura-e-Biblioteca-Pessoal
+
 cd Gestor-de-Leitura-e-Biblioteca-Pessoal
