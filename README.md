@@ -11,13 +11,6 @@ python -m venv venv venv\Scripts\activate
 
 ---
 
-## 🐧 Linux / 🍏 macOS
-python3 -m venv venv source venv/bin/activate
-
-Aplicativo desenvolvido em Python com interface Tkinter para gerenciar leituras, livros, autores e progresso pessoal.
-
----
-
 # 🪟 Windows #
 python -m venv venv
 
