@@ -5,12 +5,6 @@ Aplicativo desenvolvido em Python com interface Tkinter para gerenciar leituras,
 
 ---
 
-## 🪟 Windows
-
-python -m venv venv venv\Scripts\activate
-
----
-
 # 🪟 Windows #
 python -m venv venv
 
@@ -72,11 +66,3 @@ git clone https://github.com/GustavoCunhaSC/Gestor-de-Leitura-e-Biblioteca-Pesso
 
 - Após ativar o ambiente virtual e instalar as dependências:
 python src/main.py
-
----
-
-### 1. Clone o repositório
-
-git clone https://github.com/GustavoCunhaSC/Gestor-de-Leitura-e-Biblioteca-Pessoal
-
-cd Gestor-de-Leitura-e-Biblioteca-Pessoal
