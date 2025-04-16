@@ -29,6 +29,7 @@ def criar_tabelas():
     ''')
 
     # Criar tabela livros
+<<<<<<< HEAD
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS livros (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,6 +43,22 @@ def criar_tabelas():
             FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
         );
     ''')
+=======
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS livros (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        titulo TEXT NOT NULL,
+        autor TEXT NOT NULL,
+        status TEXT NOT NULL,
+        data_inicio TEXT,
+        data_fim TEXT,
+        caminho_pdf TEXT,
+        usuario_id INTEGER NOT NULL,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    );
+""")
+
+>>>>>>> cdd0f94835cb14b38cd47d3bd50ec39d824abee0
 
     conn.commit()
     conn.close()
