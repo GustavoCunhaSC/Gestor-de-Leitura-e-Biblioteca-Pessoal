@@ -20,6 +20,7 @@ Aplicativo desenvolvido em Python com interface Tkinter para gerenciar leituras,
 
 # 🪟 Windows #
 python -m venv venv
+
 venv\Scripts\activate
 
 ---
