@@ -1,19 +1,21 @@
-
+import os
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog as fd
+import shutil
+from database.banco import conectar
 from database.funcoes_livros import inserir_ou_obter_autor, inserir_livro, listar_livros, atualizar_livro, excluir_livro
 from database.funcoes_usuario import cadastrar_usuario, verificar_login
-from database.sessao_usuario import set_usuario_logado, get_usuario_logado, logout
+from database.sessao_usuario import set_usuario_logado, get_usuario_logado
 from utils.exportar_pdf import exportar_livros_para_pdf
 from PIL import Image, ImageTk
 import re
+import subprocess
+
 
 def toggle_fullscreen(event=None):
-    janela = event.widget
-    fullscreen = not janela.attributes("-fullscreen")
-    janela.attributes("-fullscreen", fullscreen)
-
-
+    janela = event.widget.winfo_toplevel()
+    is_fullscreen = janela.attributes("-fullscreen")
+    janela.attributes("-fullscreen", not is_fullscreen)
 
 
 def criar_botao(master, texto, comando, cor_original="#4169E1", cor_hover="#27408B", cor_texto="white"):
@@ -43,7 +45,6 @@ def criar_botao(master, texto, comando, cor_original="#4169E1", cor_hover="#2740
 
     return botao
 
-# Tela inicial com opções
 def tela_inicial(janela_inicial):
     # Configurações da janela
     janela_inicial.title("Bem-vindo ao Gerenciador de Livros")
@@ -57,7 +58,8 @@ def tela_inicial(janela_inicial):
     altura = janela_inicial.winfo_screenheight()
 
     # Caminho da imagem (pode ser relativo, se preferir portabilidade)
-    caminho_imagem = r"C:\Users\ACER\OneDrive\Área de Trabalho\Gestor-de-Leitura-e-Biblioteca-Pessoal-main\src\interface\imagem\e-books.jpg"
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    caminho_imagem = os.path.join(BASE_DIR, "interface", "imagem", "e-books.jpg")
     imagem = Image.open(caminho_imagem)
     imagem = imagem.resize((largura, altura), Image.Resampling.LANCZOS)
     fundo_img = ImageTk.PhotoImage(imagem)
@@ -79,6 +81,7 @@ def tela_inicial(janela_inicial):
     criar_botao(frame, "Cadastrar", lambda: abrir_tela_cadastro(janela_inicial), cor_original="#4169E1", cor_hover="#000000").pack(pady=5)
     criar_botao(frame, "Fechar o programa", lambda: fechar_programa(janela_inicial), cor_original="#F44336", cor_hover="#000000").pack(pady=5)
 
+
 # Tela cadastro
 
 
@@ -87,63 +90,6 @@ def validar_email(email):
     regex = r'^[a-zA-Z0-9_.+-]+@(gmail\.com|hotmail\.com|outlook\.com)$'
     return re.match(regex, email) is not None
 
-
-# tela cadastro funciona
-
-
-'''def abrir_tela_cadastro(janela_inicial):
-    janela_inicial.destroy()
-    janela_cadastro = tk.Toplevel()
-    janela_cadastro.title("Cadastro de Usuário")
-    janela_cadastro.attributes("-fullscreen", True)
-    janela_cadastro.bind_all("<Escape>", toggle_fullscreen)
-
-    tk.Label(janela_cadastro, text="Nome:").grid(row=0, column=0, padx=10, pady=5, sticky="e")
-    entry_nome = tk.Entry(janela_cadastro)
-    entry_nome.grid(row=0, column=1, padx=10, pady=5)
-
-    tk.Label(janela_cadastro, text="Email:").grid(row=1, column=0, padx=10, pady=5, sticky="e")
-    entry_email = tk.Entry(janela_cadastro)
-    entry_email.grid(row=1, column=1, padx=10, pady=5)
-
-    tk.Label(janela_cadastro, text="Senha:").grid(row=2, column=0, padx=10, pady=5, sticky="e")
-    entry_senha = tk.Entry(janela_cadastro, show="*")
-    entry_senha.grid(row=2, column=1, padx=10, pady=5)
-
-    def realizar_cadastro():
-        nome = entry_nome.get()
-        email = entry_email.get()
-        senha = entry_senha.get()
-
-        if not nome or not email or not senha:
-            messagebox.showwarning("Campos obrigatórios", "Preencha todos os campos.")
-            return
-
-        sucesso = cadastrar_usuario(nome, email, senha)
-
-        if sucesso:
-            messagebox.showinfo("Sucesso", "Usuário cadastrado com sucesso!")
-            janela_cadastro.destroy()
-            tela_inicial()
-        else:
-            messagebox.showerror("Erro", "Erro ao cadastrar usuário.")
-
-    tk.Button(janela_cadastro, text="Cadastrar", command=realizar_cadastro).grid(row=3, column=0, columnspan=2, pady=10)
-
-    # Botão para voltar à tela inicial
-    tk.Button(
-        janela_cadastro,
-        text="Voltar",
-        command=lambda: [janela_cadastro.destroy(), tela_inicial()],
-        bg="#f44336", fg="white", font=("Arial", 10, "bold")
-    ).grid(row=4, column=0, columnspan=2, pady=10)'''
-
-
-import tkinter as tk
-import os
-from tkinter import messagebox
-from PIL import Image, ImageTk
-import re  # coloque esse import no início do seu arquivo, se ainda não tiver
 
 # Função para alternar entre tela cheia e janela normal
 def toggle_fullscreen(event=None):
@@ -232,7 +178,7 @@ def abrir_tela_cadastro(janela_inicial):
 
         if sucesso:
             messagebox.showinfo("Sucesso", "Usuário cadastrado com sucesso!")
-            janela_cadastro.destroy()
+            janela_cadastro.withdraw()
             janela_inicial.deiconify() # Chama a função que abre a tela inicial
             tela_inicial(janela_inicial)
 
@@ -241,7 +187,7 @@ def abrir_tela_cadastro(janela_inicial):
 
     # Função para voltar para a tela inicial
     def voltar_para_tela_inicial():
-        janela_cadastro.destroy()
+        janela_cadastro.withdraw()
         janela_inicial.deiconify() # Chama a função que abre a tela inicial
         tela_inicial(janela_inicial)
 
@@ -344,14 +290,14 @@ def abrir_tela_login(janela_inicial):
         if usuario:
             set_usuario_logado(usuario)
             messagebox.showinfo("Bem-vindo", f"Olá, {usuario[1]}!")
-            janela_login.destroy()
+            janela_login.withdraw()
             abrir_menu_principal()
         else:
             messagebox.showerror("Erro", "Email ou senha inválidos.")
 
     # Função de voltar
     def voltar_para_tela_inicial():
-        janela_login.destroy()
+        janela_login.withdraw()
         janela_inicial.deiconify()
         tela_inicial(janela_inicial)
 
@@ -428,10 +374,12 @@ def abrir_menu_principal():
         **estilo_botao
     ).grid(row=3, column=0, pady=10)
 
+    
+
     tk.Button(
         janela_principal,
-        text="Sair da conta",
-        command=lambda: realizar_logout(janela_principal),
+        text="Fechar o programa", 
+        command=lambda: fechar_programa(janela_principal), 
         bg="#e74c3c",
         activebackground="#c0392b",
         **{k: v for k, v in estilo_botao.items() if k not in ["bg", "activebackground"]}
@@ -441,8 +389,11 @@ def abrir_menu_principal():
 
 
 
+# Tela inserir livros
 
-# Tela inserir livros nova
+import tkinter.filedialog as fd
+
+# Tela inserir livros
 def abrir_janela_inserir_livro():
     janela_inserir = tk.Toplevel()
     janela_inserir.title("Inserir Livro")
@@ -461,6 +412,27 @@ def abrir_janela_inserir_livro():
     entry_autor = tk.Entry(janela_inserir, width=40, font=fonte_padrao)
     entry_autor.pack(pady=5)
 
+    # Selecionar PDF
+    tk.Label(janela_inserir, text="Selecionar PDF do Livro (opcional)", font=fonte_padrao, bg="#f0f0f0").pack(pady=10)
+
+    frame_pdf = tk.Frame(janela_inserir, bg="#f0f0f0")
+    frame_pdf.pack(pady=5)
+
+    entry_pdf = tk.Entry(frame_pdf, width=40, font=fonte_padrao)
+    entry_pdf.pack(side=tk.LEFT, padx=(0, 10))
+
+    def selecionar_pdf():
+        caminho_pdf = fd.askopenfilename(
+            title="Selecione o PDF do livro",
+            filetypes=[("Arquivos PDF", "*.pdf")]
+        )
+        if caminho_pdf:
+            entry_pdf.delete(0, tk.END)
+            entry_pdf.insert(0, caminho_pdf)
+
+    tk.Button(frame_pdf, text="Selecionar PDF", command=selecionar_pdf, font=fonte_padrao, bg="#2196F3", fg="white").pack(side=tk.LEFT)
+
+
     # Status
     tk.Label(janela_inserir, text="Status", font=fonte_padrao, bg="#f0f0f0").pack(pady=5)
     combo_status = ttk.Combobox(janela_inserir, values=["Lido", "Lendo", "Quero ler"], font=fonte_padrao, width=38)
@@ -476,6 +448,8 @@ def abrir_janela_inserir_livro():
     entry_fim = tk.Entry(janela_inserir, width=40, font=fonte_padrao)
     entry_fim.pack(pady=5)
 
+
+
     # Botão Salvar
     tk.Button(
         janela_inserir,
@@ -485,8 +459,9 @@ def abrir_janela_inserir_livro():
         fg="white",
         width=20,
         height=2,
-        command=lambda: salvar_livro(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim)
+        command=lambda: salvar_livro(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim, entry_pdf)
     ).pack(pady=20)
+
 
     # Botão Voltar
     tk.Button(
@@ -502,36 +477,60 @@ def abrir_janela_inserir_livro():
 
 
 
-
-def salvar_livro(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim):
+def salvar_livro(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim, entry_pdf):
     titulo = entry_titulo.get()
     autor = entry_autor.get()
     status = combo_status.get()
     data_inicio = entry_inicio.get()
     data_fim = entry_fim.get()
+    caminho_pdf = entry_pdf.get()
+
 
     if not titulo or not autor or not status:
         messagebox.showwarning("Campos obrigatórios", "Preencha título, autor e status.")
         return
 
+    # Define o diretório onde os PDFs serão armazenados (dentro da pasta src)
+    diretorio_atual = os.path.dirname(os.path.abspath(__file__))
+    pasta_destino = os.path.join(diretorio_atual, "livros_pdf")
+
+    # Cria a pasta de PDFs se não existir
+    os.makedirs(pasta_destino, exist_ok=True)
+
+    # Copia o PDF para a pasta do projeto, se tiver sido fornecido
+    nome_pdf = ""
+    if caminho_pdf:
+        nome_arquivo = os.path.basename(caminho_pdf)
+        destino_pdf = os.path.join(pasta_destino, nome_arquivo)
+
+        try:
+            shutil.copy(caminho_pdf, destino_pdf)
+            nome_pdf = os.path.join("interface", "livros_pdf", nome_arquivo)  # Caminho relativo ao src
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao copiar o PDF: {str(e)}")
+            return
+        
+    # Insere no banco
     autor_id = inserir_ou_obter_autor(autor)
-    inserir_livro(titulo, autor_id, status, data_inicio, data_fim)
+    inserir_livro(titulo, autor_id, status, data_inicio, data_fim, caminho_pdf)
+
 
     messagebox.showinfo("Sucesso", "Livro cadastrado com sucesso!")
-    limpar_campos(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim)
+    limpar_campos(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim, entry_pdf)
 
 
-def limpar_campos(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim):
+def limpar_campos(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim, entry_pdf):
     entry_titulo.delete(0, tk.END)
     entry_autor.delete(0, tk.END)
     combo_status.set("")
     entry_inicio.delete(0, tk.END)
     entry_fim.delete(0, tk.END)
+    entry_pdf.delete(0, tk.END)
+
 
 
 
 # Tela ver livros
-
 def abrir_lista_livros(janela_principal):
     janela_principal.destroy()
 
@@ -583,13 +582,57 @@ def abrir_lista_livros(janela_principal):
 
     tree.place(x=largura_tela//2, y=altura_tela//2, anchor="center", width=largura_tela - 200, height=400)
 
-    def ao_clicar_duplo(event):
+    
+
+    #função para abrir o modo leitura ao clicar simples
+    def ao_clicar_simples(event):
         item = tree.selection()
         if item:
             valores = tree.item(item[0], "values")
-            abrir_edicao_livro(valores)
+            livro_id = valores[0]
 
-    tree.bind("<Double-1>", ao_clicar_duplo)
+            # Buscar o caminho do PDF pelo ID
+            caminho_pdf = obter_caminho_pdf_por_id(livro_id)
+
+            if caminho_pdf:
+                caminho_completo = os.path.abspath(caminho_pdf)  # Sem adicionar "src" à mão
+
+                if os.path.exists(caminho_completo):
+                    try:
+                        os.startfile(caminho_completo)  # Windows
+                    except AttributeError:
+                        subprocess.call(["open", caminho_completo])  # macOS
+                    except Exception:
+                        subprocess.call(["xdg-open", caminho_completo])  # Linux
+                else:
+                    messagebox.showinfo("Arquivo não encontrado", f"PDF não encontrado em:\n{caminho_completo}")
+            else:
+                messagebox.showinfo("Sem PDF", "Este livro não possui PDF associado.")
+
+
+    tree.bind("<ButtonRelease-1>", ao_clicar_simples)
+
+    def ao_clicar_direito(event):
+        iid = tree.identify_row(event.y)
+        if iid:
+            tree.selection_set(iid)  # Seleciona o item clicado
+            menu_popup.tk_popup(event.x_root, event.y_root)
+    tree.bind("<Button-3>", ao_clicar_direito)
+
+
+    # Menu popup (botão direito)
+    menu_popup = tk.Menu(janela_lista, tearoff=0)
+    menu_popup.add_command(label="Editar", command=lambda: acao_menu_popup("editar"))
+    menu_popup.add_command(label="Excluir", command=lambda: acao_menu_popup("excluir"))
+
+    def acao_menu_popup(acao):
+        item = tree.selection()
+        if item:
+            valores = tree.item(item[0], "values")
+            if acao == "editar":
+                abrir_edicao_livro(valores)
+            elif acao == "excluir":
+                excluir_livro(valores[0])
 
     # Exportar PDF
     tk.Button(
@@ -617,13 +660,20 @@ def abrir_lista_livros(janela_principal):
 
 
 
-#tela ver listas
+def obter_caminho_pdf_por_id(livro_id):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("SELECT caminho_pdf FROM livros WHERE id = ?", (livro_id,))
+    resultado = cursor.fetchone()
+    conn.close()
+    return resultado[0] if resultado else None
 
 
 
 
 
 
+#tela edição
 def abrir_edicao_livro(dados):
     id_livro, titulo_atual, autor_atual, status_atual, inicio_atual, fim_atual = dados
 
