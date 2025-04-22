@@ -476,7 +476,6 @@ def abrir_janela_inserir_livro():
     ).pack(pady=10)
 
 
-
 def salvar_livro(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim, entry_pdf):
     titulo = entry_titulo.get()
     autor = entry_autor.get()
@@ -485,19 +484,18 @@ def salvar_livro(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fi
     data_fim = entry_fim.get()
     caminho_pdf = entry_pdf.get()
 
-
     if not titulo or not autor or not status:
         messagebox.showwarning("Campos obrigatórios", "Preencha título, autor e status.")
         return
 
-    # Define o diretório onde os PDFs serão armazenados (dentro da pasta src)
+    # Define o diretório onde os PDFs serão armazenados (src/interface/livros_pdf)
     diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-    pasta_destino = os.path.join(diretorio_atual, "livros_pdf")
+    pasta_destino = os.path.join(diretorio_atual, "..", "interface", "livros_pdf")
+    pasta_destino = os.path.abspath(pasta_destino)
 
     # Cria a pasta de PDFs se não existir
     os.makedirs(pasta_destino, exist_ok=True)
 
-    # Copia o PDF para a pasta do projeto, se tiver sido fornecido
     nome_pdf = ""
     if caminho_pdf:
         nome_arquivo = os.path.basename(caminho_pdf)
@@ -505,18 +503,21 @@ def salvar_livro(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fi
 
         try:
             shutil.copy(caminho_pdf, destino_pdf)
-            nome_pdf = os.path.join("interface", "livros_pdf", nome_arquivo)  # Caminho relativo ao src
+            # Caminho relativo começando por Gestor-de-Leitura-e-Biblioteca-Pessoal
+            nome_pdf = os.path.join(
+                "Gestor-de-Leitura-e-Biblioteca-Pessoal", "src", "interface", "livros_pdf", nome_arquivo
+            )
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao copiar o PDF: {str(e)}")
             return
-        
+
     # Insere no banco
     autor_id = inserir_ou_obter_autor(autor)
-    inserir_livro(titulo, autor_id, status, data_inicio, data_fim, caminho_pdf)
-
+    inserir_livro(titulo, autor_id, status, data_inicio, data_fim, nome_pdf)
 
     messagebox.showinfo("Sucesso", "Livro cadastrado com sucesso!")
     limpar_campos(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim, entry_pdf)
+
 
 
 def limpar_campos(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim, entry_pdf):
