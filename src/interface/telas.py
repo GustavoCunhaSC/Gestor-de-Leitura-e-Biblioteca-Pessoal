@@ -228,7 +228,7 @@ def abrir_tela_login(janela_inicial):
     janela_login.bind_all("<Escape>", lambda e: janela_login.attributes("-fullscreen", False))  # Permite alternar entre fullscreen
 
     # Caminho relativo para a imagem de fundo
-    caminho_imagem = os.path.join(os.path.dirname(__file__), "imagem", "login.png")
+    caminho_imagem = os.path.join(os.path.dirname(__file__), "imagem", "login.jpg")
     
     try:
         # Carregar e redimensionar a image
