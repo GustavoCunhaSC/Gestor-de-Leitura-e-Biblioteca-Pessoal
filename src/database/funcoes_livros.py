@@ -106,7 +106,7 @@ def listar_livros(status=None):
 
 
 
-def atualizar_livro(id_livro, novo_titulo, novo_status, nova_data_inicio, nova_data_fim):
+def atualizar_livro(id_livro, novo_titulo, novo_autor, novo_status, nova_data_inicio, nova_data_fim, novo_caminho_pdf=None):
     from database.sessao_usuario import get_usuario_logado
     usuario_id = get_usuario_logado()[0]
     if usuario_id is None:
@@ -117,20 +117,29 @@ def atualizar_livro(id_livro, novo_titulo, novo_status, nova_data_inicio, nova_d
     cursor = conn.cursor()
 
     # Verifica se o livro pertence ao usuário
-    cursor.execute("SELECT id FROM livros WHERE id = ? AND usuario_id = ?", (id_livro, usuario_id))
-    if cursor.fetchone() is None:
+    cursor.execute("SELECT autor_id FROM livros WHERE id = ? AND usuario_id = ?", (id_livro, usuario_id))
+    resultado = cursor.fetchone()
+    if resultado is None:
         print("Você não tem permissão para editar este livro.")
         conn.close()
         return
 
+    autor_id = resultado[0]
+
+    # Atualiza o nome do autor
+    cursor.execute("UPDATE autores SET nome = ? WHERE id = ?", (novo_autor, autor_id))
+
+    # Atualiza o restante das informações do livro
     cursor.execute('''
         UPDATE livros
-        SET titulo = ?, status = ?, data_inicio = ?, data_fim = ?
+        SET titulo = ?, status = ?, data_inicio = ?, data_fim = ?, caminho_pdf = ?
         WHERE id = ? AND usuario_id = ?
-    ''', (novo_titulo, novo_status, nova_data_inicio, nova_data_fim, id_livro, usuario_id))
-    
+    ''', (novo_titulo, novo_status, nova_data_inicio, nova_data_fim, novo_caminho_pdf, id_livro, usuario_id))
+
     conn.commit()
     conn.close()
+
+
 
 
 

@@ -10,7 +10,7 @@ from utils.exportar_pdf import exportar_livros_para_pdf
 from PIL import Image, ImageTk
 import re
 import subprocess
-
+import sqlite3
 
 def toggle_fullscreen(event=None):
     janela = event.widget.winfo_toplevel()
@@ -45,10 +45,12 @@ def criar_botao(master, texto, comando, cor_original="#4169E1", cor_hover="#2740
 
     return botao
 
+
+#Tela Inicial
 def tela_inicial(janela_inicial):
     # Configurações da janela
     janela_inicial.title("Bem-vindo ao Gerenciador de Livros")
-    janela_inicial.attributes("-fullscreen", True)
+    janela_inicial.state('zoomed') 
     janela_inicial.bind_all("<Escape>", toggle_fullscreen)
 
     janela_inicial.update()
@@ -69,34 +71,33 @@ def tela_inicial(janela_inicial):
     fundo_label.image = fundo_img  # mantém referência
     fundo_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-    # Frame centralizado
+    # Título no topo
+    tk.Label(
+        janela_inicial, 
+        text="Bem-vindo ao Gerenciador de Livros", 
+        font=("Helvetica", 26, "bold")
+    ).place(x=largura//2, y=40, anchor="center")
+
+
+    # Frame centralizado com os botões
     frame = tk.Frame(janela_inicial, bg="", padx=0, pady=0)
-    frame.place(relx=0.5, rely=0.5, anchor="center")
+    frame.place(relx=0.44, rely=0.56, anchor="center")
 
-    # Textos e botões
-    tk.Label(frame, text="Bem-vindo ao Gerenciador de Livros", font=("Helvetica", 18, "bold")).pack(pady=(0, 20))
-    tk.Label(frame, text="Selecione uma opção:", font=("Arial", 14)).pack(pady=10)
+    tk.Label(frame, text="Selecione uma opção:", font=("Arial", 16)).pack(pady=10)
 
-    criar_botao(frame, "Login", lambda: abrir_tela_login(janela_inicial), cor_original="#4169E1", cor_hover="#000000").pack(pady=5)
-    criar_botao(frame, "Cadastrar", lambda: abrir_tela_cadastro(janela_inicial), cor_original="#4169E1", cor_hover="#000000").pack(pady=5)
-    criar_botao(frame, "Fechar o programa", lambda: fechar_programa(janela_inicial), cor_original="#F44336", cor_hover="#000000").pack(pady=5)
+    criar_botao(frame, "Login", lambda: abrir_tela_login(janela_inicial), cor_original="#4169E1", cor_hover="#000000").pack(pady=7)
+    criar_botao(frame, "Cadastrar", lambda: abrir_tela_cadastro(janela_inicial), cor_original="#4169E1", cor_hover="#000000").pack(pady=7)
+    criar_botao(frame, "Fechar o programa", lambda: fechar_programa(janela_inicial), cor_original="#F44336", cor_hover="#000000").pack(pady=7)
+
 
 
 # Tela cadastro
-
 
 # Função para validar o formato do email
 def validar_email(email):
     regex = r'^[a-zA-Z0-9_.+-]+@(gmail\.com|hotmail\.com|outlook\.com)$'
     return re.match(regex, email) is not None
 
-
-# Função para alternar entre tela cheia e janela normal
-def toggle_fullscreen(event=None):
-    global janela_cadastro
-    estado_fullscreen = janela_cadastro.attributes("-fullscreen")
-    janela_cadastro.attributes("-fullscreen", not estado_fullscreen)
-    return "break"
 
 # Função para abrir a tela de cadastro
 def abrir_tela_cadastro(janela_inicial):
@@ -105,7 +106,7 @@ def abrir_tela_cadastro(janela_inicial):
     # Criando uma nova janela (Toplevel)
     janela_cadastro = tk.Toplevel()
     janela_cadastro.title("Cadastro de Usuário")
-    janela_cadastro.attributes("-fullscreen", True)  # Janela em fullscreen
+    janela_cadastro.state('zoomed') 
     janela_cadastro.bind_all("<Escape>", toggle_fullscreen)  # Bind do teclado para tela cheia
     
     # Tamanho da tela
@@ -128,31 +129,26 @@ def abrir_tela_cadastro(janela_inicial):
     except FileNotFoundError:
         messagebox.showwarning("Imagem não encontrada", f"Não foi possível carregar a imagem:\n{caminho_imagem}")
 
-    # Frame centralizado
-    frame_cadastro = tk.Frame(janela_cadastro, bg="", padx=0, pady=0)
-
-    # Adicionando a imagem de fundo ao frame_cadastro
-    label_fundo_frame = tk.Label(frame_cadastro, image=imagem_fundo)
-    label_fundo_frame.image = imagem_fundo  # Mantém referência
-    label_fundo_frame.place(x=0, y=0, relwidth=1, relheight=1)
+    # Frame centralizado com fundo branco
+    frame_cadastro = tk.Frame(janela_cadastro, bg="#FFFFFF", padx=0, pady=0)
 
     # Posicionando o frame centralizado
-    frame_cadastro.place(relx=0.5, rely=0.5, anchor="center")
+    frame_cadastro.place(relx=0.25, rely=0.5, anchor="center")
 
     # Cabeçalho
-    tk.Label(frame_cadastro, text="Cadastro de Usuário", font=("Helvetica", 18, "bold")).pack(pady=20)
+    tk.Label(frame_cadastro, text="Cadastro de Usuário", font=("Helvetica", 18, "bold"), bg="#FFFFFF").pack(pady=20)
 
     # Campos de cadastro
-    tk.Label(frame_cadastro, text="Nome:", font=("Arial", 12)).pack(anchor="w", pady=5)
-    entry_nome = tk.Entry(frame_cadastro, font=("Arial", 12))
+    tk.Label(frame_cadastro, text="Nome:", font=("Arial", 12), bg="#FFFFFF").pack(anchor="w", pady=5)
+    entry_nome = tk.Entry(frame_cadastro, font=("Arial", 12), bg="#e2e2e2", fg="#00210f")
     entry_nome.pack(fill="x", padx=10, pady=5)
 
-    tk.Label(frame_cadastro, text="Email:", font=("Arial", 12)).pack(anchor="w", pady=5)
-    entry_email = tk.Entry(frame_cadastro, font=("Arial", 12))
+    tk.Label(frame_cadastro, text="Email:", font=("Arial", 12), bg="#FFFFFF").pack(anchor="w", pady=5)
+    entry_email = tk.Entry(frame_cadastro, font=("Arial", 12), bg="#e2e2e2", fg="#00210f")
     entry_email.pack(fill="x", padx=10, pady=5)
 
-    tk.Label(frame_cadastro, text="Senha:", font=("Arial", 12)).pack(anchor="w", pady=5)
-    entry_senha = tk.Entry(frame_cadastro, show="*", font=("Arial", 12))
+    tk.Label(frame_cadastro, text="Senha:", font=("Arial", 12), bg="#FFFFFF").pack(anchor="w", pady=5)
+    entry_senha = tk.Entry(frame_cadastro, show="*", font=("Arial", 12), bg="#e2e2e2", fg="#00210f")
     entry_senha.pack(fill="x", padx=10, pady=5)
 
     # Função para validar email
@@ -193,10 +189,10 @@ def abrir_tela_cadastro(janela_inicial):
 
     # Botões
     tk.Button(frame_cadastro, text="Cadastrar", width=20, height=2, font=("Arial", 12), bg="#4CAF50", fg="white", 
-              command=realizar_cadastro).pack(pady=20)
+            command=realizar_cadastro).pack(pady=20)
 
     tk.Button(frame_cadastro, text="Voltar para a Tela Inicial", width=20, height=2, font=("Arial", 12), bg="#f44336", fg="white", 
-              command=voltar_para_tela_inicial).pack(pady=10)
+            command=voltar_para_tela_inicial).pack(pady=10)
 
 
 
@@ -205,18 +201,11 @@ def abrir_tela_cadastro(janela_inicial):
 
 
 # Tela de login
-import tkinter as tk
-import os
-from tkinter import messagebox
-from PIL import Image, ImageTk
-
-import re
 
 def validar_email(email):
     regex = r'^[a-zA-Z0-9_.+-]+@(gmail\.com|hotmail\.com|outlook\.com)$'
     return re.match(regex, email) is not None
 
-# Função para abrir a tela de login
 def abrir_tela_login(janela_inicial):
     # Oculta a tela anterior
     janela_inicial.withdraw()
@@ -224,21 +213,21 @@ def abrir_tela_login(janela_inicial):
     # Cria nova janela de login
     janela_login = tk.Toplevel()
     janela_login.title("Login de Usuário")
-    janela_login.attributes("-fullscreen", True)  # Janela em fullscreen
+    janela_login.state('zoomed') 
     janela_login.bind_all("<Escape>", lambda e: janela_login.attributes("-fullscreen", False))  # Permite alternar entre fullscreen
 
     # Caminho relativo para a imagem de fundo
-    caminho_imagem = os.path.join(os.path.dirname(__file__), "imagem", "login.jpg")
+    caminho_imagem = os.path.join(os.path.dirname(__file__), "imagem", "login.png")
     
     try:
-        # Carregar e redimensionar a image
+        # Carregar e redimensionar a imagem
         imagem_fundo = Image.open(caminho_imagem)
         largura = janela_login.winfo_screenwidth()
         altura = janela_login.winfo_screenheight()
         imagem_fundo = imagem_fundo.resize((largura, altura), Image.Resampling.LANCZOS)
         img_fundo = ImageTk.PhotoImage(imagem_fundo)
 
-        # Label para imagem de fundo
+        # Label para imagem de fundo na janela_login
         label_fundo = tk.Label(janela_login, image=img_fundo)
         label_fundo.image = img_fundo  # Mantém referência da imagem
         label_fundo.place(x=0, y=0, relwidth=1, relheight=1)  # Posiciona a imagem de fundo
@@ -247,28 +236,23 @@ def abrir_tela_login(janela_inicial):
         messagebox.showerror("Erro", f"Imagem não encontrada no caminho: {caminho_imagem}")
         return
 
-    # Frame central (sobrepondo a imagem de fundo)
-    frame_login = tk.Frame(janela_login, bg="", padx=0, pady=0)
-
-    # Adicionando a imagem de fundo ao frame_login
-    label_fundo_frame = tk.Label(frame_login, image=img_fundo)
-    label_fundo_frame.image = img_fundo  # Mantém referência
-    label_fundo_frame.place(x=0, y=0, relwidth=1, relheight=1)
+    # Frame central (sem adicionar imagem de fundo novamente)
+    frame_login = tk.Frame(janela_login, bg="", padx=50, pady=50)
 
     # Posicionando o frame centralizado
-    frame_login.place(relx=0.5, rely=0.5, anchor="center")
+    frame_login.place(relx=0.25, rely=0.47, anchor="center")
 
     # Título
-    tk.Label(frame_login, text="Login de Usuário", font=("Helvetica", 18, "bold"), bg="#f0f0f0").pack(pady=20)
+    tk.Label(frame_login, text="Login de Usuário", font=("Helvetica", 18, "bold"), bg = "#FFFFFF").pack(pady=20)
 
     # E-mail
-    tk.Label(frame_login, text="Email:", font=("Arial", 12), bg="#f0f0f0").pack(anchor="w", pady=5)
-    entry_email = tk.Entry(frame_login, font=("Arial", 12))
+    tk.Label(frame_login, text="Email:", font=("Arial", 12), bg = "#FFFFFF").pack(anchor="w", pady=5)
+    entry_email = tk.Entry(frame_login, font=("Arial", 12), bg="#e2e2e2", fg="#00210f")  # Cor escura de fundo, texto branco
     entry_email.pack(fill="x", padx=10, pady=5)
 
     # Senha
-    tk.Label(frame_login, text="Senha:", font=("Arial", 12), bg="#f0f0f0").pack(anchor="w", pady=5)
-    entry_senha = tk.Entry(frame_login, show="*", font=("Arial", 12))
+    tk.Label(frame_login, text="Senha:", font=("Arial", 12), bg = "#FFFFFF").pack(anchor="w", pady=5)
+    entry_senha = tk.Entry(frame_login, show="*", font=("Arial", 12), bg="#e2e2e2", fg="#00210f")  # Cor escura de fundo, texto branco
     entry_senha.pack(fill="x", padx=10, pady=5)
 
     # Função de login
@@ -311,6 +295,7 @@ def abrir_tela_login(janela_inicial):
     janela_login.mainloop()
 
 
+
 # tela menu principal
 
 def abrir_menu_principal():
@@ -322,7 +307,7 @@ def abrir_menu_principal():
     global janela_principal
     janela_principal = tk.Toplevel()
     janela_principal.title("Menu Principal")
-    janela_principal.attributes("-fullscreen", True)
+    janela_principal.state('zoomed') 
     janela_principal.configure(bg="#f0f4fc")  # Fundo claro azul
 
     janela_principal.bind_all("<Escape>", toggle_fullscreen)
@@ -387,17 +372,12 @@ def abrir_menu_principal():
 
 
 
-
-
 # Tela inserir livros
 
-import tkinter.filedialog as fd
-
-# Tela inserir livros
 def abrir_janela_inserir_livro():
     janela_inserir = tk.Toplevel()
     janela_inserir.title("Inserir Livro")
-    janela_inserir.attributes("-fullscreen", True)
+    janela_inserir.state('zoomed') 
     janela_inserir.configure(bg="#f0f0f0")  # cor de fundo suave
 
     fonte_padrao = ("Arial", 14)
@@ -476,6 +456,9 @@ def abrir_janela_inserir_livro():
     ).pack(pady=10)
 
 
+
+#função salvar livro
+
 def salvar_livro(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim, entry_pdf):
     titulo = entry_titulo.get()
     autor = entry_autor.get()
@@ -532,6 +515,7 @@ def limpar_campos(entry_titulo, entry_autor, combo_status, entry_inicio, entry_f
 
 
 # Tela ver livros
+
 def abrir_lista_livros(janela_principal):
     janela_principal.destroy()
 
@@ -544,7 +528,7 @@ def abrir_lista_livros(janela_principal):
 
     janela_lista = tk.Toplevel()
     janela_lista.title("Lista de Livros")
-    janela_lista.attributes("-fullscreen", True)
+    janela_lista.state('zoomed') 
     janela_lista.configure(bg="#f2f2f2")
 
     largura_tela = janela_lista.winfo_screenwidth()
@@ -622,10 +606,25 @@ def abrir_lista_livros(janela_principal):
 
 
     # Menu popup (botão direito)
-    menu_popup = tk.Menu(janela_lista, tearoff=0)
-    menu_popup.add_command(label="Editar", command=lambda: acao_menu_popup("editar"))
-    menu_popup.add_command(label="Excluir", command=lambda: acao_menu_popup("excluir"))
+    menu_popup = tk.Menu(janela_lista, tearoff=0, bg="#e2e2e2", fg="black", font=("Arial", 12), relief="flat")
 
+    # Função para mudar a cor de fundo ao passar o mouse (hover effect)
+    def on_enter(event, item):
+        menu_popup.entryconfig(item, background="#555555")  # Cor de fundo ao passar o mouse
+    def on_leave(event, item):
+        menu_popup.entryconfig(item, background="#e2e2e2")  # Cor de fundo normal
+
+    # Adicionando os itens ao menu com personalizações
+    editar_item = menu_popup.add_command(label="Editar", command=lambda: acao_menu_popup("editar"))
+    excluir_item = menu_popup.add_command(label="Excluir", command=lambda: acao_menu_popup("excluir"))
+
+    # Efeito de hover
+    menu_popup.bind("<Enter>", lambda event: on_enter(event, editar_item))
+    menu_popup.bind("<Leave>", lambda event: on_leave(event, editar_item))
+    menu_popup.bind("<Enter>", lambda event: on_enter(event, excluir_item))
+    menu_popup.bind("<Leave>", lambda event: on_leave(event, excluir_item))
+
+    # Função de ação do menu popup
     def acao_menu_popup(acao):
         item = tree.selection()
         if item:
@@ -634,6 +633,8 @@ def abrir_lista_livros(janela_principal):
                 abrir_edicao_livro(valores)
             elif acao == "excluir":
                 excluir_livro(valores[0])
+
+
 
     # Exportar PDF
     tk.Button(
@@ -645,7 +646,7 @@ def abrir_lista_livros(janela_principal):
         width=25, 
         height=2, 
         command=exportar_pdf
-    ).place(x=largura_tela//2, y=altura_tela - 120, anchor="center")
+    ).place(x=largura_tela//2, y=altura_tela - 200, anchor="center")
 
     # Voltar ao Menu
     tk.Button(
@@ -657,7 +658,7 @@ def abrir_lista_livros(janela_principal):
         width=25,
         height=2,
         command=lambda: [janela_lista.destroy(), abrir_menu_principal()]
-    ).place(x=largura_tela//2, y=altura_tela - 60, anchor="center")
+    ).place(x=largura_tela//2, y=altura_tela - 140, anchor="center")
 
 
 
@@ -672,60 +673,156 @@ def obter_caminho_pdf_por_id(livro_id):
 
 
 
-
-
 #tela edição
 def abrir_edicao_livro(dados):
     id_livro, titulo_atual, autor_atual, status_atual, inicio_atual, fim_atual = dados
 
     janela_edicao = tk.Toplevel()
     janela_edicao.title("Editar Livro")
-    janela_edicao.geometry("400x300")
+    janela_edicao.geometry("400x700")
+    janela_edicao.config(bg="#f4f4f9")
 
-    tk.Label(janela_edicao, text="Título:").pack()
-    entrada_titulo = tk.Entry(janela_edicao)
+    def on_enter_salvar(event):
+        btn_salvar.config(bg="#388e3c", fg="white")
+
+    def on_leave_salvar(event):
+        btn_salvar.config(bg="#e2e2e2", fg="black")
+
+    def on_enter_deletar(event):
+        btn_deletar.config(bg="#d32f2f", fg="white")
+
+    def on_leave_deletar(event):
+        btn_deletar.config(bg="#e2e2e2", fg="black")
+
+    tk.Label(janela_edicao, text="Editar Livro", font=("Helvetica", 16, "bold"), bg="#f4f4f9", fg="#333333").pack(pady=20)
+
+    tk.Label(janela_edicao, text="Título:", font=("Arial", 12), bg="#f4f4f9").pack(anchor="w", padx=20, pady=5)
+    entrada_titulo = tk.Entry(janela_edicao, font=("Arial", 12), bg="#e2e2e2", fg="#333333", bd=2, relief="solid")
     entrada_titulo.insert(0, titulo_atual)
-    entrada_titulo.pack()
+    entrada_titulo.pack(fill="x", padx=20, pady=10)
 
-    tk.Label(janela_edicao, text="Status:").pack()
-    combo_status = ttk.Combobox(janela_edicao, values=["Lido", "Lendo", "Quero ler"])
+    tk.Label(janela_edicao, text="Autor:", font=("Arial", 12), bg="#f4f4f9").pack(anchor="w", padx=20, pady=5)
+    entrada_autor = tk.Entry(janela_edicao, font=("Arial", 12), bg="#e2e2e2", fg="#333333", bd=2, relief="solid")
+    entrada_autor.insert(0, autor_atual)
+    entrada_autor.pack(fill="x", padx=20, pady=10)
+
+
+    caminho_pdf_selecionado = tk.StringVar()
+    def selecionar_pdf():
+        caminho = fd.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
+        if caminho:
+            caminho_pdf_selecionado.set(caminho)
+            label_pdf.config(text=os.path.basename(caminho))
+
+    tk.Label(janela_edicao, text="PDF do livro (opcional):", font=("Arial", 12), bg="#f4f4f9").pack(anchor="w", padx=20, pady=5)
+    btn_pdf = tk.Button(janela_edicao, text="Selecionar PDF", font=("Arial", 10), command=selecionar_pdf)
+    btn_pdf.pack(padx=20, pady=(0, 5))
+
+    label_pdf = tk.Label(janela_edicao, text="Nenhum arquivo selecionado", font=("Arial", 10), bg="#f4f4f9", fg="gray")
+    label_pdf.pack(padx=20, pady=(0, 10))
+
+
+    tk.Label(janela_edicao, text="Status:", font=("Arial", 12), bg="#f4f4f9").pack(anchor="w", padx=20, pady=5)
+    combo_status = ttk.Combobox(janela_edicao, values=["Lido", "Lendo", "Quero ler"], font=("Arial", 12), state="readonly")
     combo_status.set(status_atual)
-    combo_status.pack()
+    combo_status.pack(fill="x", padx=20, pady=10)
 
-    tk.Label(janela_edicao, text="Data Início (YYYY-MM-DD):").pack()
-    entrada_inicio = tk.Entry(janela_edicao)
+    tk.Label(janela_edicao, text="Data do inicio da leitura:", font=("Arial", 12), bg="#f4f4f9").pack(anchor="w", padx=20, pady=5)
+    entrada_inicio = tk.Entry(janela_edicao, font=("Arial", 12), bg="#e2e2e2", fg="#333333", bd=2, relief="solid")
     entrada_inicio.insert(0, inicio_atual)
-    entrada_inicio.pack()
+    entrada_inicio.pack(fill="x", padx=20, pady=10)
 
-    tk.Label(janela_edicao, text="Data Fim (YYYY-MM-DD):").pack()
-    entrada_fim = tk.Entry(janela_edicao)
+    tk.Label(janela_edicao, text="Data do fim da leitura:", font=("Arial", 12), bg="#f4f4f9").pack(anchor="w", padx=20, pady=5)
+    entrada_fim = tk.Entry(janela_edicao, font=("Arial", 12), bg="#e2e2e2", fg="#333333", bd=2, relief="solid")
     entrada_fim.insert(0, fim_atual)
-    entrada_fim.pack()
+    entrada_fim.pack(fill="x", padx=20, pady=10)
+
 
     def salvar_alteracoes():
         novo_titulo = entrada_titulo.get()
         novo_status = combo_status.get()
         nova_data_inicio = entrada_inicio.get()
         nova_data_fim = entrada_fim.get()
+        novo_pdf = caminho_pdf_selecionado.get() if caminho_pdf_selecionado.get() else None
+        novo_autor = entrada_autor.get()
 
-        atualizar_livro(id_livro, novo_titulo, novo_status, nova_data_inicio, nova_data_fim)
+
+        atualizar_livro(id_livro, novo_titulo, novo_autor, novo_status, nova_data_inicio, nova_data_fim, novo_pdf)
         janela_edicao.destroy()
+
 
     def deletar():
         excluir_livro(id_livro)
         janela_edicao.destroy()
 
-    tk.Button(janela_edicao, text="Salvar Alterações", command=salvar_alteracoes).pack(pady=5)
-    tk.Button(janela_edicao, text="Excluir Livro", command=deletar, fg="red").pack()
+    # Botão salvar
+    btn_salvar = tk.Button(janela_edicao, text="Salvar Alterações", font=("Arial", 12), bg="#e2e2e2", fg="black", command=salvar_alteracoes)
+    btn_salvar.pack(fill="x", padx=20, pady=10)
+    btn_salvar.bind("<Enter>", on_enter_salvar)
+    btn_salvar.bind("<Leave>", on_leave_salvar)
+
+    # Botão deletar
+    btn_deletar = tk.Button(janela_edicao, text="Excluir Livro", font=("Arial", 12), bg="#e2e2e2", fg="black", command=deletar)
+    btn_deletar.pack(fill="x", padx=20, pady=10)
+    btn_deletar.bind("<Enter>", on_enter_deletar)
+    btn_deletar.bind("<Leave>", on_leave_deletar)
+
+
+
 
 from database.funcoes_estatisticas import contar_livros_por_mes
 
-#tela estatisticas
 def mostrar_estatisticas(janela_principal):
     janela_principal.destroy()
     janela = tk.Toplevel()
     janela.title("Estatísticas de Leitura")
-    janela.attributes("-fullscreen", True)
+    janela.state('zoomed') 
+    janela.bind_all("<Escape>", toggle_fullscreen)
+
+    # Frame centralizado
+    frame_estatisticas = tk.Frame(janela, bg="#f9f9f9", padx=20, pady=20)
+    frame_estatisticas.place(relx=0.5, rely=0.5, anchor="center")
+
+    # Cabeçalho
+    tk.Label(frame_estatisticas, text="Estatísticas de Leitura", font=("Helvetica", 18, "bold")).pack(pady=20)
+
+    # Dicionário para traduzir nomes dos meses do inglês para o português
+    meses_pt = {
+        "January": "Janeiro", "February": "Fevereiro", "March": "Março",
+        "April": "Abril", "May": "Maio", "June": "Junho",
+        "July": "Julho", "August": "Agosto", "September": "Setembro",
+        "October": "Outubro", "November": "Novembro", "December": "Dezembro"
+    }
+
+    # Exibição das estatísticas com nomes de meses em português
+    estatisticas = contar_livros_por_mes()
+
+    if not estatisticas:
+        tk.Label(frame_estatisticas, text="Nenhum dado de leitura encontrado.", font=("Arial", 12)).pack(pady=20)
+    else:
+        for mes, qtd in sorted(estatisticas.items()):
+            nome_mes_pt = meses_pt.get(mes, mes)  # Pega a versão traduzida, se existir
+            tk.Label(frame_estatisticas, text=f"{nome_mes_pt}: {qtd} livro(s)", font=("Arial", 12)).pack(pady=5)
+
+    # Botão para voltar ao menu principal
+    tk.Button(
+        frame_estatisticas,
+        text="Voltar ao Menu",
+        command=lambda: [janela.destroy(), abrir_menu_principal()],
+        width=20, height=2,
+        font=("Arial", 12),
+        bg="#f44336", fg="white"
+    ).pack(pady=20)
+
+    janela.mainloop()
+
+
+
+def mostrar_estatisticas(janela_principal):
+    janela_principal.destroy()
+    janela = tk.Toplevel()
+    janela.title("Estatísticas de Leitura")
+    janela.state('zoomed') 
     janela.bind_all("<Escape>", toggle_fullscreen)
 
     # Frame centralizado
@@ -741,8 +838,8 @@ def mostrar_estatisticas(janela_principal):
     if not estatisticas:
         tk.Label(frame_estatisticas, text="Nenhum dado de leitura encontrado.", font=("Arial", 12)).pack(pady=20)
     else:
-        for mes, qtd in sorted(estatisticas.items()):
-            tk.Label(frame_estatisticas, text=f"{mes}: {qtd} livro(s)", font=("Arial", 12)).pack(pady=5)
+        for mes_ano, qtd in estatisticas.items():
+            tk.Label(frame_estatisticas, text=f"{mes_ano}: {qtd} livro(s)", font=("Arial", 12)).pack(pady=5)
 
     # Botão Voltar ao Menu
     tk.Button(
@@ -755,6 +852,62 @@ def mostrar_estatisticas(janela_principal):
     ).pack(pady=20)
 
     janela.mainloop()
+
+
+#função para deixar os meses em portugues e ordenar corretamente na tela estatisticas
+import sqlite3
+import os
+from collections import defaultdict
+
+def contar_livros_por_mes():
+    # Caminho absoluto do banco de dados
+    caminho_banco = os.path.join(os.path.dirname(__file__), '..', 'biblioteca.db')
+    conn = sqlite3.connect(os.path.abspath(caminho_banco))
+    cursor = conn.cursor()
+
+    # Consulta para pegar todas as datas de fim dos livros lidos
+    cursor.execute("SELECT data_fim FROM livros WHERE status = 'Lido'")
+    datas = cursor.fetchall()
+
+    conn.close()
+
+    # Verifique se as datas foram retornadas
+    if not datas:
+        print("Nenhum livro encontrado com o status 'Lido'.")
+        return {}
+
+    contagem_por_mes = defaultdict(int)
+
+    # Nomes dos meses em português
+    nomes_meses = {
+        1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
+        5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
+        9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
+    }
+
+    for (data_fim,) in datas:
+        if data_fim:
+            try:
+                # Divida a data no formato 'DD/MM/YYYY'
+                dia, mes, ano = map(int, data_fim.split("/"))
+                nome_mes = nomes_meses.get(mes, f"Mês {mes}")
+                chave = (ano, mes)  # Usando (ano, mês) para ordenação correta
+                contagem_por_mes[chave] += 1
+            except ValueError:
+                print(f"Erro ao processar a data: {data_fim}")
+                continue
+
+    # Ordenando as chaves (ano, mês) corretamente
+    contagem_por_mes_ordenada = sorted(contagem_por_mes.items())
+
+    # Agora transformamos as chaves de volta para o formato 'Mês Ano' para exibir
+    contagem_por_mes_final = {}
+    for (ano, mes), qtd in contagem_por_mes_ordenada:
+        nome_mes = nomes_meses.get(mes, f"Mês {mes}")
+        chave_formatada = f"{nome_mes} {ano}"
+        contagem_por_mes_final[chave_formatada] = qtd
+
+    return contagem_por_mes_final
 
 
 def exportar_pdf():
