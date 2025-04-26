@@ -673,7 +673,7 @@ def obter_caminho_pdf_por_id(livro_id):
 
 
 
-#tela edição
+# tela edição
 def abrir_edicao_livro(dados):
     id_livro, titulo_atual, autor_atual, status_atual, inicio_atual, fim_atual = dados
 
@@ -706,13 +706,36 @@ def abrir_edicao_livro(dados):
     entrada_autor.insert(0, autor_atual)
     entrada_autor.pack(fill="x", padx=20, pady=10)
 
-
     caminho_pdf_selecionado = tk.StringVar()
+
     def selecionar_pdf():
-        caminho = fd.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
-        if caminho:
-            caminho_pdf_selecionado.set(caminho)
-            label_pdf.config(text=os.path.basename(caminho))
+        caminho_original = fd.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
+        if caminho_original:
+            # Pasta destino correta (interface/livros_pdf)
+            pasta_destino = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "src", "interface", "livros_pdf")
+            os.makedirs(pasta_destino, exist_ok=True)
+
+            nome_arquivo = os.path.basename(caminho_original)
+            caminho_destino = os.path.join(pasta_destino, nome_arquivo)
+
+            try:
+                shutil.copy(caminho_original, caminho_destino)
+
+                # Definir o caminho padrão que queremos salvar no banco
+                caminho_relativo_no_banco = os.path.join(
+                    "Gestor-de-Leitura-e-Biblioteca-Pessoal",
+                    "src",
+                    "interface",
+                    "livros_pdf",
+                    nome_arquivo
+                )
+
+                caminho_pdf_selecionado.set(caminho_relativo_no_banco)
+                label_pdf.config(text=nome_arquivo)
+            except Exception as e:
+                print(f"Erro ao copiar o arquivo PDF: {e}")
+                caminho_pdf_selecionado.set("")
+                label_pdf.config(text="Erro ao selecionar PDF")
 
     tk.Label(janela_edicao, text="PDF do livro (opcional):", font=("Arial", 12), bg="#f4f4f9").pack(anchor="w", padx=20, pady=5)
     btn_pdf = tk.Button(janela_edicao, text="Selecionar PDF", font=("Arial", 10), command=selecionar_pdf)
@@ -720,7 +743,6 @@ def abrir_edicao_livro(dados):
 
     label_pdf = tk.Label(janela_edicao, text="Nenhum arquivo selecionado", font=("Arial", 10), bg="#f4f4f9", fg="gray")
     label_pdf.pack(padx=20, pady=(0, 10))
-
 
     tk.Label(janela_edicao, text="Status:", font=("Arial", 12), bg="#f4f4f9").pack(anchor="w", padx=20, pady=5)
     combo_status = ttk.Combobox(janela_edicao, values=["Lido", "Lendo", "Quero ler"], font=("Arial", 12), state="readonly")
@@ -737,7 +759,6 @@ def abrir_edicao_livro(dados):
     entrada_fim.insert(0, fim_atual)
     entrada_fim.pack(fill="x", padx=20, pady=10)
 
-
     def salvar_alteracoes():
         novo_titulo = entrada_titulo.get()
         novo_status = combo_status.get()
@@ -746,10 +767,8 @@ def abrir_edicao_livro(dados):
         novo_pdf = caminho_pdf_selecionado.get() if caminho_pdf_selecionado.get() else None
         novo_autor = entrada_autor.get()
 
-
         atualizar_livro(id_livro, novo_titulo, novo_autor, novo_status, nova_data_inicio, nova_data_fim, novo_pdf)
         janela_edicao.destroy()
-
 
     def deletar():
         excluir_livro(id_livro)
@@ -766,7 +785,6 @@ def abrir_edicao_livro(dados):
     btn_deletar.pack(fill="x", padx=20, pady=10)
     btn_deletar.bind("<Enter>", on_enter_deletar)
     btn_deletar.bind("<Leave>", on_leave_deletar)
-
 
 
 
@@ -909,6 +927,43 @@ def contar_livros_por_mes():
 
     return contagem_por_mes_final
 
+
+
+def selecionar_pdf_e_copiar():
+    # Deixa o usuário escolher o arquivo
+    caminho_original = fd.askopenfilename(
+        title="Selecione o arquivo PDF",
+        filetypes=[("Arquivos PDF", "*.pdf")]
+    )
+
+    if not caminho_original:
+        print("Nenhum arquivo selecionado.")
+        return None
+
+    # Caminho da pasta onde vamos guardar os PDFs no projeto
+    pasta_destino = os.path.join(os.path.dirname(os.path.dirname(__file__)), "interface", "livros_pdf")
+
+    # Cria a pasta se ela não existir
+    os.makedirs(pasta_destino, exist_ok=True)
+
+    # Pega o nome do arquivo selecionado
+    nome_arquivo = os.path.basename(caminho_original)
+
+    # Define o novo caminho
+    novo_caminho = os.path.join(pasta_destino, nome_arquivo)
+
+    try:
+        # Copia o arquivo para a pasta do projeto
+        shutil.copy2(caminho_original, novo_caminho)
+        print(f"Arquivo copiado para {novo_caminho}")
+
+        # Retorna o caminho relativo para salvar no banco
+        caminho_relativo = os.path.relpath(novo_caminho, start=os.path.dirname(os.path.dirname(__file__)))
+        return caminho_relativo
+    except Exception as e:
+        print(f"Erro ao copiar o arquivo: {e}")
+        return None
+    
 
 def exportar_pdf():
     exportar_livros_para_pdf()
