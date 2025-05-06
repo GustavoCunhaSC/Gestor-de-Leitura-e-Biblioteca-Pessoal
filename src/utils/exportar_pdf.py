@@ -4,10 +4,9 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from textwrap import wrap
-from database.funcoes_livros import listar_livros
-
+from services.livro_service import service_listar_livros
 def exportar_livros_para_pdf(status=None, nome_arquivo="lista_livros.pdf"):
-    livros = listar_livros(status)
+    livros = service_listar_livros(status)
 
     if not livros:
         print("Nenhum livro encontrado para exportar.")
