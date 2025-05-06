@@ -3,8 +3,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog as fd
 import shutil
 from database.banco import conectar
-from database.funcoes_livros import inserir_ou_obter_autor, inserir_livro, listar_livros, atualizar_livro, excluir_livro
-from database.funcoes_usuario import cadastrar_usuario, verificar_login
+from services.livro_service import inserir_ou_obter_autor, buscar_autor_por_nome, inserir_livro, service_listar_livros, service_atualizar_livro, service_excluir_livro
+from services.usuario_service import service_cadastrar_usuario, service_verificar_login
 from database.sessao_usuario import set_usuario_logado, get_usuario_logado
 from utils.exportar_pdf import exportar_livros_para_pdf
 from PIL import Image, ImageTk
@@ -170,7 +170,7 @@ def abrir_tela_cadastro(janela_inicial):
             messagebox.showerror("Email inválido", "Use um email válido (@gmail.com, @hotmail.com, etc).")
             return
 
-        sucesso = cadastrar_usuario(nome, email, senha)
+        sucesso = service_cadastrar_usuario(nome, email, senha)
 
         if sucesso:
             messagebox.showinfo("Sucesso", "Usuário cadastrado com sucesso!")
@@ -269,7 +269,7 @@ def abrir_tela_login(janela_inicial):
             messagebox.showwarning("E-mail inválido", "Digite um e-mail válido, como exemplo@gmail.com.")
             return
 
-        usuario = verificar_login(email, senha)
+        usuario = service_verificar_login(email, senha)
 
         if usuario:
             set_usuario_logado(usuario)
@@ -523,7 +523,7 @@ def abrir_lista_livros(janela_principal):
         status_filtrado = combo_filtro.get()
         tree.delete(*tree.get_children())  # Limpa a tabela
 
-        for livro in listar_livros(status=status_filtrado if status_filtrado else None):
+        for livro in service_listar_livros(status=status_filtrado if status_filtrado else None):
             tree.insert("", tk.END, values=livro)
 
     janela_lista = tk.Toplevel()
@@ -562,7 +562,7 @@ def abrir_lista_livros(janela_principal):
     tree.heading("Início", text="Início")
     tree.heading("Fim", text="Fim")
 
-    for livro in listar_livros():
+    for livro in service_listar_livros():
         tree.insert("", tk.END, values=livro)
 
     tree.place(x=largura_tela//2, y=altura_tela//2, anchor="center", width=largura_tela - 200, height=400)
@@ -632,7 +632,7 @@ def abrir_lista_livros(janela_principal):
             if acao == "editar":
                 abrir_edicao_livro(valores)
             elif acao == "excluir":
-                excluir_livro(valores[0])
+                service_excluir_livro(valores[0])
 
 
 
@@ -767,11 +767,11 @@ def abrir_edicao_livro(dados):
         novo_pdf = caminho_pdf_selecionado.get() if caminho_pdf_selecionado.get() else None
         novo_autor = entrada_autor.get()
 
-        atualizar_livro(id_livro, novo_titulo, novo_autor, novo_status, nova_data_inicio, nova_data_fim, novo_pdf)
+        service_atualizar_livro(id_livro, novo_titulo, novo_autor, novo_status, nova_data_inicio, nova_data_fim, novo_pdf)
         janela_edicao.destroy()
 
     def deletar():
-        excluir_livro(id_livro)
+        service_excluir_livro(id_livro)
         janela_edicao.destroy()
 
     # Botão salvar
