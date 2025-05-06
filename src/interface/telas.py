@@ -295,8 +295,11 @@ def abrir_tela_login(janela_inicial):
     janela_login.mainloop()
 
 
+import tkinter as tk
+from tkinter import messagebox
+from PIL import Image, ImageTk
+import os
 
-# tela menu principal
 
 def abrir_menu_principal():
     usuario = get_usuario_logado()
@@ -304,71 +307,90 @@ def abrir_menu_principal():
         messagebox.showerror("Erro", "Nenhum usuário logado.")
         return
 
+    # Criar janela principal
     global janela_principal
     janela_principal = tk.Toplevel()
     janela_principal.title("Menu Principal")
-    janela_principal.state('zoomed') 
-    janela_principal.configure(bg="#f0f4fc")  # Fundo claro azul
+    janela_principal.state('zoomed')  # Tela cheia
 
-    janela_principal.bind_all("<Escape>", toggle_fullscreen)
+    # Carregar imagem de fundo
+    imagem_tk = carregar_imagem_fundo(janela_principal)
 
-    # Centralização com grid
-    for i in range(7):
-        janela_principal.rowconfigure(i, weight=1)
-    janela_principal.columnconfigure(0, weight=1)
+    # Exibir imagem como fundo
+    label_fundo = tk.Label(janela_principal, image=imagem_tk)
+    label_fundo.image = imagem_tk  # evitar garbage collection
+    label_fundo.place(x=0, y=0, relwidth=1, relheight=1)
+
+    # Container central
+    container = tk.Frame(janela_principal, bg="white")
+    container.place(relx=0.3, rely=0.4, anchor="center")
 
     # Cabeçalho
     tk.Label(
-        janela_principal,
+        container,
         text=f"Bem-vindo(a), {usuario[1]}!",
         font=("Helvetica", 24, "bold"),
-        bg="#f0f4fc",
-        fg="#2c3e50"
-    ).grid(row=0, column=0, pady=10)
+        fg="#2c3e50",
+        bg="white"
+    ).pack(pady=20)
+
+    # Botões do menu
+    botoes = [
+        ("Inserir Livro", lambda: [janela_principal.destroy(), abrir_janela_inserir_livro()]),
+        ("Ver Lista de Livros", lambda: abrir_lista_livros(janela_principal)),
+        ("Estatísticas de Leitura", lambda: mostrar_estatisticas(janela_principal)),
+        ("Fechar o programa", lambda: fechar_programa(janela_principal)),
+    ]
 
     estilo_botao = {
         "width": 30,
-        "height": 3,
+        "height": 2,
         "font": ("Arial", 14, "bold"),
-        "bg": "#3498db",
         "fg": "white",
-        "activebackground": "#2980b9",
         "activeforeground": "white",
-        "bd": 0
+        "bd": 3,
+        "relief": "raised",
+        "highlightthickness": 0,
     }
 
-    # Botões
-    tk.Button(
-        janela_principal,
-        text="Inserir Livro",
-        command=abrir_janela_inserir_livro,
-        **estilo_botao
-    ).grid(row=1, column=0, pady=10)
+    frame_botoes = tk.Frame(container, bg="white")
+    frame_botoes.pack()
 
-    tk.Button(
-        janela_principal,
-        text="Ver Lista de Livros",
-        command=lambda: abrir_lista_livros(janela_principal),
-        **estilo_botao
-    ).grid(row=2, column=0, pady=10)
+    for texto, comando in botoes:
+        cor_normal = "#e74c3c" if "Fechar" in texto else "#3498db"
+        cor_hover = "#c0392b" if "Fechar" in texto else "#2980b9"
 
-    tk.Button(
-        janela_principal,
-        text="Estatísticas de Leitura",
-        command=lambda: mostrar_estatisticas(janela_principal),
-        **estilo_botao
-    ).grid(row=3, column=0, pady=10)
+        botao = tk.Button(
+            frame_botoes,
+            text=texto,
+            command=comando,
+            bg=cor_normal,
+            activebackground=cor_hover,
+            **{k: v for k, v in estilo_botao.items() if k not in ["bg", "activebackground"]}
+        )
+        botao.bind("<Enter>", lambda e, b=botao, c=cor_hover: b.config(bg=c))
+        botao.bind("<Leave>", lambda e, b=botao, c=cor_normal: b.config(bg=c))
+        botao.pack(pady=12)
 
-    
+    # Frame de conteúdo dinâmico
+    global frame_conteudo
+    frame_conteudo = tk.Frame(janela_principal, bg="white")
+    frame_conteudo.place(relx=0.7, rely=0.5, anchor="center")
 
-    tk.Button(
-        janela_principal,
-        text="Fechar o programa", 
-        command=lambda: fechar_programa(janela_principal), 
-        bg="#e74c3c",
-        activebackground="#c0392b",
-        **{k: v for k, v in estilo_botao.items() if k not in ["bg", "activebackground"]}
-    ).grid(row=4, column=0, pady=30)
+    janela_principal.bind_all("<Escape>", lambda e: toggle_fullscreen(e, janela=janela_principal))
+
+
+
+
+def carregar_imagem_fundo(janela_principal):
+    caminho_imagem = os.path.join(os.path.dirname(__file__), "imagem", "principal.webp")
+    imagem_fundo = Image.open(caminho_imagem).convert("RGBA")
+    largura = janela_principal.winfo_screenwidth()
+    altura = janela_principal.winfo_screenheight()
+    imagem_fundo = imagem_fundo.resize((largura, altura), Image.LANCZOS)
+    return ImageTk.PhotoImage(imagem_fundo)
+
+
 
 
 
@@ -379,6 +401,8 @@ def abrir_janela_inserir_livro():
     janela_inserir.title("Inserir Livro")
     janela_inserir.state('zoomed') 
     janela_inserir.configure(bg="#f0f0f0")  # cor de fundo suave
+
+
 
     fonte_padrao = ("Arial", 14)
 
@@ -835,41 +859,117 @@ def mostrar_estatisticas(janela_principal):
     janela.mainloop()
 
 
+import os
+import tkinter as tk
+from tkinter import Canvas, Toplevel, Frame, Label, Button, messagebox
+from PIL import Image, ImageTk
+
+# Função para alternar entre fullscreen
+def toggle_fullscreen(event=None, janela=None):
+    is_fullscreen = janela.state() == 'zoomed'
+    janela.state('normal' if is_fullscreen else 'zoomed')
+
+# Função fictícia para contar livros por mês
+def contar_livros_por_mes():
+    return {
+        'Janeiro 2025': 5,
+        'Fevereiro 2025': 3,
+        'Março 2025': 8,
+    }
+
+# Voltar da tela de estatísticas para o menu
+def voltar_ao_menu(janela_estatisticas, janela_principal):
+    janela_estatisticas.destroy()
+    janela_principal.deiconify()
 
 def mostrar_estatisticas(janela_principal):
-    janela_principal.destroy()
-    janela = tk.Toplevel()
-    janela.title("Estatísticas de Leitura")
-    janela.state('zoomed') 
-    janela.bind_all("<Escape>", toggle_fullscreen)
+    janela_principal.withdraw()  # Oculta a janela principal temporariamente
 
-    # Frame centralizado
-    frame_estatisticas = tk.Frame(janela, bg="#f9f9f9", padx=20, pady=20)
+    janela = Toplevel()
+    janela.title("Estatísticas de Leitura")
+    janela.state('zoomed')
+    janela.bind_all("<Escape>", lambda event: toggle_fullscreen(event, janela))
+
+    caminho_imagem = os.path.join(os.path.dirname(__file__), "..", "interface", "imagem", "estatistica.webp")
+    print("Caminho da imagem:", caminho_imagem)
+
+    if not os.path.exists(caminho_imagem):
+        print("Imagem não encontrada:", caminho_imagem)
+        messagebox.showerror("Erro", "Imagem de fundo não encontrada.")
+        janela.destroy()
+        janela_principal.deiconify()
+        return
+
+    imagem_pil = Image.open(caminho_imagem).convert("RGB")
+    imagem_pil = imagem_pil.resize(
+        (janela.winfo_screenwidth(), janela.winfo_screenheight()),
+        Image.Resampling.LANCZOS
+    )
+    fundo_imagem = ImageTk.PhotoImage(imagem_pil)
+
+    canvas = Canvas(janela, width=janela.winfo_screenwidth(), height=janela.winfo_screenheight())
+    canvas.pack(fill="both", expand=True)
+    canvas.create_image(0, 0, anchor="nw", image=fundo_imagem)
+    canvas.fundo_imagem = fundo_imagem  # evita coleta de lixo
+
+    frame_estatisticas = Frame(janela, bg="#f9f9f9", padx=20, pady=20)
     frame_estatisticas.place(relx=0.5, rely=0.5, anchor="center")
 
-    # Cabeçalho
-    tk.Label(frame_estatisticas, text="Estatísticas de Leitura", font=("Helvetica", 18, "bold")).pack(pady=20)
+    Label(frame_estatisticas, text="Estatísticas de Leitura", font=("Helvetica", 18, "bold")).pack(pady=20)
 
-    # Exibição das estatísticas
     estatisticas = contar_livros_por_mes()
-
     if not estatisticas:
-        tk.Label(frame_estatisticas, text="Nenhum dado de leitura encontrado.", font=("Arial", 12)).pack(pady=20)
+        Label(frame_estatisticas, text="Nenhum dado de leitura encontrado.", font=("Arial", 12)).pack(pady=20)
     else:
         for mes_ano, qtd in estatisticas.items():
-            tk.Label(frame_estatisticas, text=f"{mes_ano}: {qtd} livro(s)", font=("Arial", 12)).pack(pady=5)
+            Label(frame_estatisticas, text=f"{mes_ano}: {qtd} livro(s)", font=("Arial", 12)).pack(pady=5)
 
-    # Botão Voltar ao Menu
-    tk.Button(
+    Button(
         frame_estatisticas,
         text="Voltar ao Menu",
-        command=lambda: [janela.destroy(), abrir_menu_principal()],
+        command=lambda: voltar_ao_menu(janela, janela_principal),
         width=20, height=2,
         font=("Arial", 12),
         bg="#f44336", fg="white"
     ).pack(pady=20)
 
+# Função para criar a tela principal
+def abrir_tela_principal():
+    janela = tk.Tk()
+    janela.title("Menu Principal")
+    janela.state('zoomed')
+    janela.configure(bg="#ffffff")
+
+    Label(
+        janela,
+        text="Bem-vindo ao Gestor de Leitura",
+        font=("Helvetica", 20, "bold"),
+        bg="#ffffff"
+    ).pack(pady=40)
+
+    Button(
+        janela,
+        text="Ver Estatísticas de Leitura",
+        command=lambda: mostrar_estatisticas(janela),
+        font=("Arial", 14),
+        bg="#2196F3", fg="white",
+        width=25, height=2
+    ).pack(pady=20)
+
     janela.mainloop()
+
+# Executar
+if __name__ == "__main__":
+    abrir_tela_principal()
+
+
+
+
+
+
+
+
+
 
 
 #função para deixar os meses em portugues e ordenar corretamente na tela estatisticas
