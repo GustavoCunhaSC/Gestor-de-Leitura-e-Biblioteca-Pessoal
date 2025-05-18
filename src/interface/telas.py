@@ -23,7 +23,7 @@ def criar_botao(master, texto, comando, cor_original="#4169E1", cor_hover="#2740
         master,
         text=texto,
         command=comando,
-        font=("Arial", 12),
+        font=("Arial", 15),
         bg=cor_original,
         fg=cor_texto,
         relief="flat",
@@ -83,7 +83,7 @@ def tela_inicial(janela_inicial):
     frame = tk.Frame(janela_inicial, bg="", padx=0, pady=0)
     frame.place(relx=0.44, rely=0.56, anchor="center")
 
-    tk.Label(frame, text="Selecione uma opção:", font=("Arial", 16)).pack(pady=10)
+    tk.Label(frame, text="Selecione uma opção:", font=("Arial", 20)).pack(pady=10)
 
     criar_botao(frame, "Login", lambda: abrir_tela_login(janela_inicial), cor_original="#4169E1", cor_hover="#000000").pack(pady=7)
     criar_botao(frame, "Cadastrar", lambda: abrir_tela_cadastro(janela_inicial), cor_original="#4169E1", cor_hover="#000000").pack(pady=7)
@@ -136,19 +136,19 @@ def abrir_tela_cadastro(janela_inicial):
     frame_cadastro.place(relx=0.25, rely=0.5, anchor="center")
 
     # Cabeçalho
-    tk.Label(frame_cadastro, text="Cadastro de Usuário", font=("Helvetica", 18, "bold"), bg="#FFFFFF").pack(pady=20)
+    tk.Label(frame_cadastro, text="Cadastro de Usuário", font=("Helvetica", 28, "bold"), bg="#FFFFFF").pack(pady=20)
 
     # Campos de cadastro
-    tk.Label(frame_cadastro, text="Nome:", font=("Arial", 12), bg="#FFFFFF").pack(anchor="w", pady=5)
-    entry_nome = tk.Entry(frame_cadastro, font=("Arial", 12), bg="#e2e2e2", fg="#00210f")
+    tk.Label(frame_cadastro, text="Nome:", font=("Arial", 18), bg="#FFFFFF").pack(anchor="w", pady=5)
+    entry_nome = tk.Entry(frame_cadastro, font=("Arial", 15), bg="#e2e2e2", fg="#00210f")
     entry_nome.pack(fill="x", padx=10, pady=5)
 
-    tk.Label(frame_cadastro, text="Email:", font=("Arial", 12), bg="#FFFFFF").pack(anchor="w", pady=5)
-    entry_email = tk.Entry(frame_cadastro, font=("Arial", 12), bg="#e2e2e2", fg="#00210f")
+    tk.Label(frame_cadastro, text="Email:", font=("Arial", 18), bg="#FFFFFF").pack(anchor="w", pady=5)
+    entry_email = tk.Entry(frame_cadastro, font=("Arial", 15), bg="#e2e2e2", fg="#00210f")
     entry_email.pack(fill="x", padx=10, pady=5)
 
-    tk.Label(frame_cadastro, text="Senha:", font=("Arial", 12), bg="#FFFFFF").pack(anchor="w", pady=5)
-    entry_senha = tk.Entry(frame_cadastro, show="*", font=("Arial", 12), bg="#e2e2e2", fg="#00210f")
+    tk.Label(frame_cadastro, text="Senha:", font=("Arial", 18), bg="#FFFFFF").pack(anchor="w", pady=5)
+    entry_senha = tk.Entry(frame_cadastro, show="*", font=("Arial", 15), bg="#e2e2e2", fg="#00210f")
     entry_senha.pack(fill="x", padx=10, pady=5)
 
     # Função para validar email
@@ -188,11 +188,28 @@ def abrir_tela_cadastro(janela_inicial):
         tela_inicial(janela_inicial)
 
     # Botões
-    tk.Button(frame_cadastro, text="Cadastrar", width=20, height=2, font=("Arial", 12), bg="#4CAF50", fg="white", 
-            command=realizar_cadastro).pack(pady=20)
+    frame_botoes = tk.Frame(frame_cadastro)
+    frame_botoes.pack(pady=20)  # Espaçamento vertical entre os campos e os botões
 
-    tk.Button(frame_cadastro, text="Voltar para a Tela Inicial", width=20, height=2, font=("Arial", 12), bg="#f44336", fg="white", 
-            command=voltar_para_tela_inicial).pack(pady=10)
+    # Botão Entrar
+    tk.Button(
+        frame_botoes, text="Cadastrar", width=18, height=2,
+        font=("Arial", 15), bg="#4CAF50", fg="white",
+        command=realizar_cadastro
+    ).pack(side="left", padx=10)  # Espaçamento horizontal entre os botões
+
+    # Botão Voltar para a Tela Inicial
+    tk.Button(
+        frame_botoes, text="Home", width=18, height=2,
+        font=("Arial", 15), bg="#f44336", fg="white",
+        command=voltar_para_tela_inicial
+    ).pack(side="left", padx=10)
+
+    # tk.Button(frame_cadastro, text="Cadastrar", width=20, height=2, font=("Arial", 12), bg="#4CAF50", fg="white", 
+    #         command=realizar_cadastro).pack(pady=20)
+
+    # tk.Button(frame_cadastro, text="Voltar para a Tela Inicial", width=20, height=2, font=("Arial", 12), bg="#f44336", fg="white", 
+    #         command=voltar_para_tela_inicial).pack(pady=10)
 
 
 
@@ -243,17 +260,17 @@ def abrir_tela_login(janela_inicial):
     frame_login.place(relx=0.25, rely=0.47, anchor="center")
 
     # Título
-    tk.Label(frame_login, text="Login de Usuário", font=("Helvetica", 18, "bold"), bg = "#FFFFFF").pack(pady=20)
+    tk.Label(frame_login, text="Login de Usuário", font=("Helvetica", 28, "bold"), bg = "#FFFFFF").pack(pady=20)
 
     # E-mail
-    tk.Label(frame_login, text="Email:", font=("Arial", 12), bg = "#FFFFFF").pack(anchor="w", pady=5)
-    entry_email = tk.Entry(frame_login, font=("Arial", 12), bg="#e2e2e2", fg="#00210f")  # Cor escura de fundo, texto branco
-    entry_email.pack(fill="x", padx=10, pady=5)
+    tk.Label(frame_login, text="Email:", font=("Arial", 18), bg = "#FFFFFF").pack(anchor="w", pady=5)
+    entry_email = tk.Entry(frame_login, font=("Arial", 15), bg="#e2e2e2", fg="#00210f")  # Cor escura de fundo, texto branco
+    entry_email.pack(fill="x", padx=8, pady=4)
 
     # Senha
-    tk.Label(frame_login, text="Senha:", font=("Arial", 12), bg = "#FFFFFF").pack(anchor="w", pady=5)
-    entry_senha = tk.Entry(frame_login, show="*", font=("Arial", 12), bg="#e2e2e2", fg="#00210f")  # Cor escura de fundo, texto branco
-    entry_senha.pack(fill="x", padx=10, pady=5)
+    tk.Label(frame_login, text="Senha:", font=("Arial", 18), bg = "#FFFFFF").pack(anchor="w", pady=5)
+    entry_senha = tk.Entry(frame_login, show="*", font=("Arial",18), bg="#e2e2e2", fg="#00210f")  # Cor escura de fundo, texto branco
+    entry_senha.pack(fill="x", padx=8, pady=4)
 
     # Função de login
     def realizar_login():
@@ -285,12 +302,23 @@ def abrir_tela_login(janela_inicial):
         janela_inicial.deiconify()
         tela_inicial(janela_inicial)
 
-    # Botões
-    tk.Button(frame_login, text="Entrar", width=20, height=2, font=("Arial", 12), bg="#4CAF50", fg="white", 
-              command=realizar_login).pack(pady=20)
+    # Botões Login
+    frame_botoes = tk.Frame(frame_login)
+    frame_botoes.pack(pady=20)  # Espaçamento vertical entre os campos e os botões
 
-    tk.Button(frame_login, text="Voltar para a Tela Inicial", width=20, height=2, font=("Arial", 12), bg="#f44336", fg="white", 
-              command=voltar_para_tela_inicial).pack(pady=10)
+    # Botão Entrar
+    tk.Button(
+        frame_botoes, text="Entrar", width=18, height=2,
+        font=("Arial", 15), bg="#4CAF50", fg="white",
+        command=realizar_login
+    ).pack(side="left", padx=10)  # Espaçamento horizontal entre os botões
+
+    # Botão Voltar para a Tela Inicial
+    tk.Button(
+        frame_botoes, text="Home", width=18, height=2,
+        font=("Arial", 15), bg="#f44336", fg="white",
+        command=voltar_para_tela_inicial
+    ).pack(side="left", padx=10)
 
     janela_login.mainloop()
 
