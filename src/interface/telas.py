@@ -351,7 +351,7 @@ def abrir_menu_principal():
 
     # Container central
     container = tk.Frame(janela_principal, bg="white")
-    container.place(relx=0.3, rely=0.4, anchor="center")
+    container.place(relx=0.22, rely=0.47, anchor="center")
 
     # Cabeçalho
     tk.Label(
@@ -411,7 +411,7 @@ def abrir_menu_principal():
 
 
 def carregar_imagem_fundo(janela_principal):
-    caminho_imagem = os.path.join(os.path.dirname(__file__), "imagem", "principal.webp")
+    caminho_imagem = os.path.join(os.path.dirname(__file__), "imagem", "principal.png")
     imagem_fundo = Image.open(caminho_imagem).convert("RGBA")
     largura = janela_principal.winfo_screenwidth()
     altura = janela_principal.winfo_screenheight()
