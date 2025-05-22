@@ -554,109 +554,98 @@ def abrir_lista_livros(janela_principal):
     def filtrar():
         status_filtrado = combo_filtro.get()
         tree.delete(*tree.get_children())  # Limpa a tabela
-
         for livro in service_listar_livros(status=status_filtrado if status_filtrado else None):
             tree.insert("", tk.END, values=livro)
 
     janela_lista = tk.Toplevel()
     janela_lista.title("Lista de Livros")
-    janela_lista.state('zoomed') 
+    janela_lista.state('zoomed')
     janela_lista.configure(bg="#f2f2f2")
 
     largura_tela = janela_lista.winfo_screenwidth()
     altura_tela = janela_lista.winfo_screenheight()
 
+    fonte_titulo = ("Helvetica", 26, "bold")
+    fonte_padrao = ("Arial", 14)
+    fonte_tabela = ("Arial", 13)
+
     # Título
-    tk.Label(janela_lista, text="Lista de Livros", font=("Helvetica", 24, "bold"), bg="#f2f2f2").place(x=largura_tela//2, y=40, anchor="center")
+    tk.Label(janela_lista, text="📚 Lista de Livros", font=fonte_titulo, bg="#f2f2f2", fg="#333").pack(pady=(30, 10))
 
     # Filtro
-    tk.Label(janela_lista, text="Filtrar por status:", font=("Arial", 14), bg="#f2f2f2").place(x=largura_tela//2, y=100, anchor="center")
-    combo_filtro = ttk.Combobox(janela_lista, values=["", "Lido", "Lendo", "Quero ler"], font=("Arial", 12), width=20)
-    combo_filtro.place(x=largura_tela//2, y=140, anchor="center")
+    filtro_frame = tk.Frame(janela_lista, bg="#f2f2f2")
+    filtro_frame.pack(pady=10)
+
+    tk.Label(filtro_frame, text="Filtrar por status:", font=fonte_padrao, bg="#f2f2f2").pack(side=tk.LEFT, padx=10)
+    combo_filtro = ttk.Combobox(filtro_frame, values=["", "Lido", "Lendo", "Quero ler"], font=fonte_padrao, width=20)
+    combo_filtro.pack(side=tk.LEFT, padx=10)
 
     tk.Button(
-        janela_lista, 
-        text="Aplicar Filtro", 
-        font=("Arial", 12), 
-        bg="#2196F3", 
-        fg="white", 
-        width=20, 
-        height=2, 
+        filtro_frame,
+        text="Aplicar Filtro",
+        font=fonte_padrao,
+        bg="#2196F3",
+        fg="white",
+        width=15,
+        height=1,
         command=filtrar
-    ).place(x=largura_tela//2, y=190, anchor="center")
+    ).pack(side=tk.LEFT, padx=10)
 
     # Tabela
-    tree = ttk.Treeview(janela_lista, columns=("ID", "Título", "Autor", "Status", "Início", "Fim"), show="headings")
-    tree.heading("ID", text="ID")
-    tree.heading("Título", text="Título")
-    tree.heading("Autor", text="Autor")
-    tree.heading("Status", text="Status")
-    tree.heading("Início", text="Início")
-    tree.heading("Fim", text="Fim")
+    style = ttk.Style()
+    style.configure("Treeview.Heading", font=("Arial", 14, "bold"), foreground="#333")
+    style.configure("Treeview", font=fonte_tabela, rowheight=30)
+
+    tree = ttk.Treeview(
+        janela_lista,
+        columns=("ID", "Título", "Autor", "Status", "Início", "Fim"),
+        show="headings"
+    )
+    for col in ("ID", "Título", "Autor", "Status", "Início", "Fim"):
+        tree.heading(col, text=col)
+        tree.column(col, anchor="center")
 
     for livro in service_listar_livros():
         tree.insert("", tk.END, values=livro)
 
-    tree.place(x=largura_tela//2, y=altura_tela//2, anchor="center", width=largura_tela - 200, height=400)
+    tree.pack(pady=20, padx=50, fill="both", expand=True)
 
-    
-
-    #função para abrir o modo leitura ao clicar simples
+    # Função de leitura ao clique simples
     def ao_clicar_simples(event):
         item = tree.selection()
         if item:
             valores = tree.item(item[0], "values")
             livro_id = valores[0]
-
-            # Buscar o caminho do PDF pelo ID
             caminho_pdf = obter_caminho_pdf_por_id(livro_id)
-
             if caminho_pdf:
-                caminho_completo = os.path.abspath(caminho_pdf)  # Sem adicionar "src" à mão
-
+                caminho_completo = os.path.abspath(caminho_pdf)
                 if os.path.exists(caminho_completo):
                     try:
-                        os.startfile(caminho_completo)  # Windows
+                        os.startfile(caminho_completo)
                     except AttributeError:
-                        subprocess.call(["open", caminho_completo])  # macOS
+                        subprocess.call(["open", caminho_completo])
                     except Exception:
-                        subprocess.call(["xdg-open", caminho_completo])  # Linux
+                        subprocess.call(["xdg-open", caminho_completo])
                 else:
                     messagebox.showinfo("Arquivo não encontrado", f"PDF não encontrado em:\n{caminho_completo}")
             else:
                 messagebox.showinfo("Sem PDF", "Este livro não possui PDF associado.")
 
-
     tree.bind("<ButtonRelease-1>", ao_clicar_simples)
 
+    # Clique direito (menu popup)
     def ao_clicar_direito(event):
         iid = tree.identify_row(event.y)
         if iid:
-            tree.selection_set(iid)  # Seleciona o item clicado
+            tree.selection_set(iid)
             menu_popup.tk_popup(event.x_root, event.y_root)
+
     tree.bind("<Button-3>", ao_clicar_direito)
 
+    menu_popup = tk.Menu(janela_lista, tearoff=0, font=fonte_padrao, bg="#ffffff", fg="#000000", relief="flat")
+    menu_popup.add_command(label="✏️ Editar", command=lambda: acao_menu_popup("editar"))
+    menu_popup.add_command(label="🗑️ Excluir", command=lambda: acao_menu_popup("excluir"))
 
-    # Menu popup (botão direito)
-    menu_popup = tk.Menu(janela_lista, tearoff=0, bg="#e2e2e2", fg="black", font=("Arial", 12), relief="flat")
-
-    # Função para mudar a cor de fundo ao passar o mouse (hover effect)
-    def on_enter(event, item):
-        menu_popup.entryconfig(item, background="#555555")  # Cor de fundo ao passar o mouse
-    def on_leave(event, item):
-        menu_popup.entryconfig(item, background="#e2e2e2")  # Cor de fundo normal
-
-    # Adicionando os itens ao menu com personalizações
-    editar_item = menu_popup.add_command(label="Editar", command=lambda: acao_menu_popup("editar"))
-    excluir_item = menu_popup.add_command(label="Excluir", command=lambda: acao_menu_popup("excluir"))
-
-    # Efeito de hover
-    menu_popup.bind("<Enter>", lambda event: on_enter(event, editar_item))
-    menu_popup.bind("<Leave>", lambda event: on_leave(event, editar_item))
-    menu_popup.bind("<Enter>", lambda event: on_enter(event, excluir_item))
-    menu_popup.bind("<Leave>", lambda event: on_leave(event, excluir_item))
-
-    # Função de ação do menu popup
     def acao_menu_popup(acao):
         item = tree.selection()
         if item:
@@ -666,31 +655,31 @@ def abrir_lista_livros(janela_principal):
             elif acao == "excluir":
                 service_excluir_livro(valores[0])
 
+    # Botões de ações finais
+    botoes_frame = tk.Frame(janela_lista, bg="#f2f2f2")
+    botoes_frame.pack(pady=30)
 
-
-    # Exportar PDF
     tk.Button(
-        janela_lista, 
-        text="Exportar Lista em PDF", 
-        font=("Arial", 12), 
-        bg="#4CAF50", 
-        fg="white", 
-        width=25, 
-        height=2, 
+        botoes_frame,
+        text="📤 Exportar Lista em PDF",
+        font=fonte_padrao,
+        bg="#4CAF50",
+        fg="white",
+        width=25,
+        height=2,
         command=exportar_pdf
-    ).place(x=largura_tela//2, y=altura_tela - 200, anchor="center")
+    ).pack(side=tk.LEFT, padx=20)
 
-    # Voltar ao Menu
     tk.Button(
-        janela_lista,
-        text="Voltar ao Menu",
-        font=("Arial", 12),
+        botoes_frame,
+        text="⬅️ Voltar ao Menu",
+        font=fonte_padrao,
         bg="#f44336",
         fg="white",
         width=25,
         height=2,
         command=lambda: [janela_lista.destroy(), abrir_menu_principal()]
-    ).place(x=largura_tela//2, y=altura_tela - 140, anchor="center")
+    ).pack(side=tk.LEFT, padx=20)
 
 
 
@@ -829,6 +818,10 @@ def mostrar_estatisticas(janela_principal):
     janela.state('zoomed') 
     janela.bind_all("<Escape>", toggle_fullscreen)
 
+    largura_tela = janela_principal.winfo_screenwidth()
+    altura_tela = janela_principal.winfo_screenheight()
+
+
     # Frame centralizado
     frame_estatisticas = tk.Frame(janela, bg="#f9f9f9", padx=20, pady=20)
     frame_estatisticas.place(relx=0.5, rely=0.5, anchor="center")
@@ -864,11 +857,14 @@ def mostrar_estatisticas(janela_principal):
         bg="#f44336", fg="white"
     ).pack(pady=20)
 
+    tk.Button(frame_estatisticas, text="Voltar ao Menu", font=("Arial", 14, "bold"),
+              bg="#f44336", fg="white", width=18, height=2,
+              command=lambda: [frame_estatisticas.destroy(), abrir_menu_principal()]
+              ).pack(side=tk.LEFT, padx=20)
     janela.mainloop()
 
 
-import os
-import tkinter as tk
+
 from tkinter import Canvas, Toplevel, Frame, Label, Button, messagebox
 from PIL import Image, ImageTk
 
@@ -898,7 +894,7 @@ def mostrar_estatisticas(janela_principal):
     janela.state('zoomed')
     janela.bind_all("<Escape>", lambda event: toggle_fullscreen(event, janela))
 
-    caminho_imagem = os.path.join(os.path.dirname(__file__), "..", "interface", "imagem", "estatistica.webp")
+    caminho_imagem = os.path.join(os.path.dirname(__file__), "..", "interface", "imagem", "estatisticas.jpg")
     print("Caminho da imagem:", caminho_imagem)
 
     if not os.path.exists(caminho_imagem):
