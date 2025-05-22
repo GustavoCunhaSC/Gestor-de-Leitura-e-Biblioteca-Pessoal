@@ -427,85 +427,65 @@ def carregar_imagem_fundo(janela_principal):
 def abrir_janela_inserir_livro():
     janela_inserir = tk.Toplevel()
     janela_inserir.title("Inserir Livro")
-    janela_inserir.state('zoomed') 
-    janela_inserir.configure(bg="#f0f0f0")  # cor de fundo suave
+    janela_inserir.state('zoomed')
+    janela_inserir.configure(bg="#e6f2ff")  # tom azul claro agradável
 
-
-
+    fonte_titulo = ("Arial", 24, "bold")
     fonte_padrao = ("Arial", 14)
 
-    # Título
-    tk.Label(janela_inserir, text="Título do Livro", font=fonte_padrao, bg="#f0f0f0").pack(pady=(40, 5))
-    entry_titulo = tk.Entry(janela_inserir, width=40, font=fonte_padrao)
-    entry_titulo.pack(pady=5)
+    # Container principal centralizado
+    container = tk.Frame(janela_inserir, bg="#ffffff", bd=2, relief="groove")
+    container.place(relx=0.5, rely=0.5, anchor="center")
 
-    # Autor
-    tk.Label(janela_inserir, text="Autor", font=fonte_padrao, bg="#f0f0f0").pack(pady=5)
-    entry_autor = tk.Entry(janela_inserir, width=40, font=fonte_padrao)
-    entry_autor.pack(pady=5)
+    # Título da Janela
+    tk.Label(container, text="Cadastro de Novo Livro", font=fonte_titulo, bg="#ffffff", fg="#333").pack(pady=(30, 20))
 
-    # Selecionar PDF
-    tk.Label(janela_inserir, text="Selecionar PDF do Livro (opcional)", font=fonte_padrao, bg="#f0f0f0").pack(pady=10)
+    def criar_entrada(rotulo, entry_var=None, tipo="entry"):
+        tk.Label(container, text=rotulo, font=fonte_padrao, bg="#ffffff", anchor="w").pack(fill="x", padx=30, pady=(10, 2))
+        if tipo == "entry":
+            entrada = tk.Entry(container, width=50, font=fonte_padrao)
+        elif tipo == "combo":
+            entrada = ttk.Combobox(container, values=["Lido", "Lendo", "Quero ler"], font=fonte_padrao, width=48)
+        entrada.pack(padx=30, pady=2)
+        return entrada
 
-    frame_pdf = tk.Frame(janela_inserir, bg="#f0f0f0")
-    frame_pdf.pack(pady=5)
+    entry_titulo = criar_entrada("Título do Livro")
+    entry_autor = criar_entrada("Autor")
 
-    entry_pdf = tk.Entry(frame_pdf, width=40, font=fonte_padrao)
+    # PDF
+    tk.Label(container, text="Selecionar PDF do Livro (opcional)", font=fonte_padrao, bg="#ffffff").pack(fill="x", padx=30, pady=(10, 2))
+    frame_pdf = tk.Frame(container, bg="#ffffff")
+    frame_pdf.pack(padx=30, pady=5, fill="x")
+
+    entry_pdf = tk.Entry(frame_pdf, width=42, font=fonte_padrao)
     entry_pdf.pack(side=tk.LEFT, padx=(0, 10))
 
     def selecionar_pdf():
-        caminho_pdf = fd.askopenfilename(
-            title="Selecione o PDF do livro",
-            filetypes=[("Arquivos PDF", "*.pdf")]
-        )
+        caminho_pdf = fd.askopenfilename(title="Selecione o PDF do livro", filetypes=[("Arquivos PDF", "*.pdf")])
         if caminho_pdf:
             entry_pdf.delete(0, tk.END)
             entry_pdf.insert(0, caminho_pdf)
 
-    tk.Button(frame_pdf, text="Selecionar PDF", command=selecionar_pdf, font=fonte_padrao, bg="#2196F3", fg="white").pack(side=tk.LEFT)
+    tk.Button(frame_pdf, text="Selecionar PDF", command=selecionar_pdf,
+              font=("Arial", 12, "bold"), bg="#2196F3", fg="white", padx=10).pack(side=tk.LEFT)
 
+    combo_status = criar_entrada("Status", tipo="combo")
+    entry_inicio = criar_entrada("Data de Início da leitura")
+    entry_fim = criar_entrada("Data de Fim da leitura")
 
-    # Status
-    tk.Label(janela_inserir, text="Status", font=fonte_padrao, bg="#f0f0f0").pack(pady=5)
-    combo_status = ttk.Combobox(janela_inserir, values=["Lido", "Lendo", "Quero ler"], font=fonte_padrao, width=38)
-    combo_status.pack(pady=5)
+    # Botões
+    frame_botoes = tk.Frame(container, bg="#ffffff")
+    frame_botoes.pack(pady=30)
 
-    # Data de Início
-    tk.Label(janela_inserir, text="Data de Início da leitura", font=fonte_padrao, bg="#f0f0f0").pack(pady=5)
-    entry_inicio = tk.Entry(janela_inserir, width=40, font=fonte_padrao)
-    entry_inicio.pack(pady=5)
+    tk.Button(frame_botoes, text="Salvar Livro", font=("Arial", 14, "bold"),
+              bg="#4CAF50", fg="white", width=18, height=2,
+              command=lambda: salvar_livro(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim, entry_pdf)
+              ).pack(side=tk.LEFT, padx=20)
 
-    # Data de Fim
-    tk.Label(janela_inserir, text="Data de Fim da leitura", font=fonte_padrao, bg="#f0f0f0").pack(pady=5)
-    entry_fim = tk.Entry(janela_inserir, width=40, font=fonte_padrao)
-    entry_fim.pack(pady=5)
-
-
-
-    # Botão Salvar
-    tk.Button(
-        janela_inserir,
-        text="Salvar Livro",
-        font=fonte_padrao,
-        bg="#4CAF50",
-        fg="white",
-        width=20,
-        height=2,
-        command=lambda: salvar_livro(entry_titulo, entry_autor, combo_status, entry_inicio, entry_fim, entry_pdf)
-    ).pack(pady=20)
-
-
-    # Botão Voltar
-    tk.Button(
-        janela_inserir,
-        text="Voltar ao Menu",
-        font=fonte_padrao,
-        bg="#f44336",
-        fg="white",
-        width=20,
-        height=2,
-        command=lambda: [janela_inserir.destroy(), abrir_menu_principal()]
-    ).pack(pady=10)
+    tk.Button(frame_botoes, text="Voltar ao Menu", font=("Arial", 14, "bold"),
+              bg="#f44336", fg="white", width=18, height=2,
+              command=lambda: [janela_inserir.destroy(), abrir_menu_principal()]
+              ).pack(side=tk.LEFT, padx=20)
 
 
 
