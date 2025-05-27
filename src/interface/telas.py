@@ -76,12 +76,12 @@ def tela_inicial(janela_inicial):
         janela_inicial, 
         text="Bem-vindo ao Gerenciador de Livros", 
         font=("Helvetica", 26, "bold")
-    ).place(x=largura//2, y=40, anchor="center")
+    ).place(x=largura//2, y=100, anchor="center")
 
 
     # Frame centralizado com os botões
     frame = tk.Frame(janela_inicial, bg="", padx=0, pady=0)
-    frame.place(relx=0.44, rely=0.56, anchor="center")
+    frame.place(relx=0.50, rely=0.56, anchor="center")
 
     tk.Label(frame, text="Selecione uma opção:", font=("Arial", 20)).pack(pady=10)
 
