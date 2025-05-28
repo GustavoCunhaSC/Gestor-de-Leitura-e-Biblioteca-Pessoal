@@ -1,4 +1,5 @@
 from database.sessao_usuario import get_usuario_logado
+from database.conection_livros import conectar
 from repositories.livro_repository import (
     listar_livros_por_usuario, 
     obter_pdf_por_id,
@@ -36,12 +37,36 @@ def service_obter_pdf_por_id(id_livro):
 def service_listar_autores():
     return listar_autores()
 
-def service_atualizar_livro(id_livro, novo_titulo, novo_status, nova_data_inicio, nova_data_fim):
+def service_atualizar_livro(id_livro, novo_titulo, novo_autor_nome, novo_status, nova_data_inicio, nova_data_fim, caminho_pdf):
     usuario = get_usuario_logado()
     if usuario is None:
         print("Nenhum usuário logado.")
         return
-    sucesso = atualizar_livro_por_id(id_livro, usuario[0], novo_titulo, novo_status, nova_data_inicio, nova_data_fim)
+
+    # Buscar o autor pelo nome e obter o ID
+    autor = buscar_autor_por_nome(novo_autor_nome)
+    if autor:
+        autor_id = autor[0]
+    else:
+        print("Autor não encontrado.")
+        return
+
+    # Se o caminho_pdf não foi alterado, manter o que já estava no banco
+    if not caminho_pdf:
+        conn = conectar()
+        cursor = conn.cursor()
+        cursor.execute("SELECT caminho_pdf FROM livros WHERE id = ? AND usuario_id = ?", (id_livro, usuario[0]))
+        resultado = cursor.fetchone()
+        conn.close()
+        if resultado:
+            caminho_pdf = resultado[0]
+
+    sucesso = atualizar_livro_por_id(
+        id_livro, usuario[0],
+        novo_titulo, autor_id, novo_status,
+        nova_data_inicio, nova_data_fim, caminho_pdf
+    )
+
     if not sucesso:
         print("Você não tem permissão para editar este livro.")
 

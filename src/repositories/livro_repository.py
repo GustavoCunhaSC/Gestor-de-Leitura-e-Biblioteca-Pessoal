@@ -60,24 +60,30 @@ def listar_autores():
     conn.close()
     return autores
 
-def atualizar_livro_por_id(id_livro, usuario_id, novo_titulo, novo_status, nova_data_inicio, nova_data_fim):
+def atualizar_livro_por_id(id_livro, usuario_id, novo_titulo, novo_autor, novo_status, nova_data_inicio, nova_data_fim, caminho_pdf):
     conn = conectar()
     cursor = conn.cursor()
-    
-    # Garante que o livro pertence ao usuário
+
+    # Verifica se o livro pertence ao usuário
     cursor.execute("SELECT id FROM livros WHERE id = ? AND usuario_id = ?", (id_livro, usuario_id))
     if cursor.fetchone() is None:
         conn.close()
-        return False  # Sem permissão
+        return False
 
     cursor.execute('''
         UPDATE livros
-        SET titulo = ?, status = ?, data_inicio = ?, data_fim = ?
+        SET titulo = ?, autor_id = ?, status = ?, data_inicio = ?, data_fim = ?, caminho_pdf = ?
         WHERE id = ? AND usuario_id = ?
-    ''', (novo_titulo, novo_status, nova_data_inicio, nova_data_fim, id_livro, usuario_id))
+    ''', (
+        novo_titulo, novo_autor, novo_status,
+        nova_data_inicio, nova_data_fim, caminho_pdf,
+        id_livro, usuario_id
+    ))
+
     conn.commit()
     conn.close()
     return True
+
 
 def excluir_livro_por_id(id_livro, usuario_id):
     conn = conectar()
