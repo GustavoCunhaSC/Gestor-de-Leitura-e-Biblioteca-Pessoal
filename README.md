@@ -26,6 +26,7 @@
 ### 1. Clone o repositório
 
 git clone https://github.com/GustavoCunhaSC/Gestor-de-Leitura-e-Biblioteca-Pessoal.git
+
 cd Gestor-de-Leitura-e-Biblioteca-Pessoal
 
 ### 2. Crie e ative o ambiente virtual
