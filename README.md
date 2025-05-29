@@ -1,68 +1,48 @@
-# 📚 Gestor-de-Leitura-e-Biblioteca-Pessoal
+# 📚 Gestor de Leitura e Biblioteca Pessoal
 
-
-Aplicativo desenvolvido em Python com interface Tkinter para gerenciar leituras, livros, autores e progresso pessoal.
-
----
-
-# 🪟 Windows #
-python -m venv venv
-
-venv\Scripts\activate
-
----
-
-# 🐧 Linux / 🍏 macOS #
-python3 -m venv venv
-
-source venv/bin/activate
-
-
----
-
-## 🔧 Requisitos
-
-Python 3.10 ou superior
-Git
-=======
-
-- Python 3.10 ou superior
-- Git
-
----
-
-## Instale as dependências
-
-pip install -r requirements.txt
-
-- pip install -r requirements.txt
-
+**Gestor de Leitura e Biblioteca Pessoal** é uma aplicação desenvolvida em Python com foco em leitores que desejam organizar suas leituras, acompanhar as estatísticas de leitura, e manter um histórico completo da sua biblioteca pessoal.
 
 ---
 
 ## ✨ Funcionalidades
 
-Cadastro de livros, autores e status da leitura (lido, lendo, quero ler)
-
-Estatísticas de leitura mensal
-Exportação da lista de livros em PDF
-
-
-- Cadastro de livros, autores e status da leitura *(lido, lendo, quero ler)*
-- Estatísticas de leitura mensal
-- Exportação da lista de livros em **PDF**
+- ✅ Cadastro de livros com título, autor, categoria e status de leitura
+- ✅ Estatísticas de leitura mensal
+- ✅ Exportação da lista de livros em PDF
 
 ---
 
-## 🧪 Executando o Projeto
+## 🛠️ Tecnologias Utilizadas
 
-Após ativar o ambiente virtual e instalar as dependências: python src/main.py
+- Python 3.10+
+- Tkinter (interface gráfica)
+- SQLite (banco de dados local)
+- venv (ambiente virtual padrão do Python)
 
 ---
 
-## Clone o repositório
-git clone https://github.com/GustavoCunhaSC/Gestor-de-Leitura-e-Biblioteca-Pessoal
+## 🚀 Como Executar o Projeto
 
+### 1. Clone o repositório
 
-- Após ativar o ambiente virtual e instalar as dependências:
+git clone https://github.com/GustavoCunhaSC/Gestor-de-Leitura-e-Biblioteca-Pessoal.git
+cd Gestor-de-Leitura-e-Biblioteca-Pessoal
+
+### 2. Crie e ative o ambiente virtual
+
+## 🪟 Windows
+
+python -m venv venv
+venv\Scripts\activate
+
+## Linux / 🍎 macOS
+
+python3 -m venv venv
+source venv/bin/activate
+
+### 📦 3. Instale as dependências
+
+pip install -r requirements.txt
+
+### ▶️ 4. Execute o projeto
 python src/main.py
